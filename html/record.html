@@ -8,17 +8,16 @@
     <style>
         .record-page {
             flex: 1;
-            height: 100vh;
+            min-height: 100vh;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             padding: 3rem 2rem;
         }
 
         .record-wrap {
-            max-width: 640px;
+            max-width: 720px;
             width: 100%;
         }
 
@@ -29,34 +28,60 @@
             margin-bottom: 1.5rem;
         }
 
+        /* 文章卡片 */
         .record-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            padding: 1rem 0;
-            border-bottom: 1px solid #eee;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1.75rem 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease forwards;
         }
 
-        .record-item .dot {
-            flex-shrink: 0;
-            width: 12px;
-            height: 12px;
-            margin-top: 0.4rem;
-            background: #D162CB;
+        .record-item .record-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .record-item .title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            line-height: 1.4;
         }
 
         .record-item .date {
             font-size: 0.85rem;
             color: #999;
             font-weight: 500;
-            min-width: 88px;
             flex-shrink: 0;
         }
 
         .record-item .text {
             color: #555;
             font-size: 1rem;
-            line-height: 1.7;
+            line-height: 1.9;
+        }
+
+        .record-item .text p {
+            margin-bottom: 0.9rem;
+        }
+
+        .record-item .text p:last-child {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 480px) {
+            .record-page {
+                padding: 2rem 1.25rem;
+            }
+            .record-item {
+                padding: 1.5rem 1.25rem;
+            }
         }
     </style>
 </head>
@@ -71,22 +96,38 @@
     </div>
 
     <script src="../js/script.js"></script>
+    <!-- 随笔数据在 HTML 外维护：data/records.js（定义全局 recordData） -->
+    <script src="data/records.js"></script>
     <script>
-        const recordData = [
-            { date: '2026.07.20', text: '新建了记录页面。' },
-            { date: '2026.07.19', text: '更新了个人主页的配色。' },
-            { date: '2026.07.18', text: '添加了名片翻转效果。' },
-        ];
-
+        // 数据来自 ../js/records.js，这里只负责渲染
         const list = document.getElementById('recordList');
-        recordData.forEach(item => {
+        recordData.forEach((item, i) => {
             const el = document.createElement('div');
             el.className = 'record-item';
-            el.innerHTML = `
-                <span class="dot"></span>
-                <span class="date">${item.date}</span>
-                <span class="text">${item.text}</span>
-            `;
+            el.style.animationDelay = (0.15 + i * 0.12) + 's';
+
+            const head = document.createElement('div');
+            head.className = 'record-head';
+
+            const title = document.createElement('span');
+            title.className = 'title';
+            title.textContent = item.title;
+
+            const date = document.createElement('span');
+            date.className = 'date';
+            date.textContent = item.date;
+
+            head.append(title, date);
+
+            const text = document.createElement('div');
+            text.className = 'text';
+            (item.content || []).forEach(p => {
+                const para = document.createElement('p');
+                para.textContent = p;
+                text.appendChild(para);
+            });
+
+            el.append(head, text);
             list.appendChild(el);
         });
     </script>
