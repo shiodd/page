@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>名片墙 · Shion</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <style>
+        .friends-page {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .friends-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .friend-card {
+            background: rgba(255, 255, 255, 0.85);
+            padding: 1.25rem;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .friend-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .friend-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+            margin-bottom: 0.75rem;
+        }
+
+        .friend-card .name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        .card-flip {
+            perspective: 1000px;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .card-flip-inner {
+            position: relative;
+            transition: transform 0.6s ease;
+            transform-style: preserve-3d;
+        }
+
+        .card-flip.flipped-right .card-flip-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-flip.flipped-left .card-flip-inner {
+            transform: rotateY(-180deg);
+        }
+
+        .card-face {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        .card-face img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .card-back {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body>
+    <nav class="top-nav" id="topNav">
+        <button class="nav-toggle" id="navToggle" aria-label="菜单">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="nav-dropdown" id="navDropdown">
+            <button class="nav-btn" style="--btn-color: #c59fda" onclick="window.location.href='../index.html'"><span>首页</span></button>
+            <button class="nav-btn" style="--btn-color: #3498db" onclick="window.location.href='about.html'"><span>关于</span></button>
+            <button class="nav-btn" style="--btn-color: #2ecc71" onclick="window.location.href='friends.html'"><span>名片墙</span></button>
+            <button class="nav-btn" style="--btn-color: #f39c12" data-target="projects"><span>项目</span></button>
+            <button class="nav-btn" style="--btn-color: #9b59b6" onclick="window.location.href='card.html#contact'"><span>名片</span></button>
+        </div>
+    </nav>
+
+    <div class="arrow-blocks" id="arrowBlocks"></div>
+
+    <div class="friends-page">
+        <div class="friends-grid" id="friendsGrid"></div>
+    </div>
+
+    <script src="../js/script.js"></script>
+    <script>
+        const friendsData = [
+            { name: '友人A', front: '../image/meishi/正.png', back: '../image/meishi/反.png' }
+        ];
+
+        const grid = document.getElementById('friendsGrid');
+
+        friendsData.forEach((friend, index) => {
+            const card = document.createElement('div');
+            card.className = 'friend-card';
+            card.innerHTML = `
+                <div class="card-flip" data-index="${index}">
+                    <div class="card-flip-inner">
+                        <div class="card-face card-front">
+                            <img src="${friend.front}" alt="${friend.name}名片正面" />
+                        </div>
+                        <div class="card-face card-back">
+                            <img src="${friend.back}" alt="${friend.name}名片反面" />
+                        </div>
+                    </div>
+                </div>
+                <div class="name">${friend.name}</div>
+            `;
+            grid.appendChild(card);
+        });
+
+        document.querySelectorAll('.card-flip').forEach(el => {
+            el.addEventListener('click', function(e) {
+                const rect = this.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const isLeft = x < rect.width / 2;
+                const isFlipped = this.classList.contains('flipped-right') || this.classList.contains('flipped-left');
+                this.classList.remove('flipped-right', 'flipped-left');
+                if (!isFlipped) {
+                    this.classList.add(isLeft ? 'flipped-right' : 'flipped-left');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

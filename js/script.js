@@ -4,9 +4,10 @@ const dropdown = document.getElementById('navDropdown');
 
 // 色条配置：每个页面对应的颜色和色条类型
 const pageConfig = {
-    'index.html':    { color: '#c59fda', type: 'vertical' },
-    'html/about.html': { color: '#3498db', type: 'horizontal' },
-    'html/card.html':  { color: '#9b59b6', type: 'vertical' },
+    'index.html':       { color: '#c59fda', type: 'vertical' },
+    'html/about.html':  { color: '#3498db', type: 'horizontal' },
+    'html/card.html':   { color: '#9b59b6', type: 'vertical' },
+    'html/friends.html': { color: '#2ecc71', type: 'vertical' },
 };
 
 // 获取当前页面的配置
@@ -97,7 +98,7 @@ document.querySelectorAll('.nav-dropdown .nav-btn').forEach(btn => {
         const pageMap = {
             home: 'index.html',
             about: 'html/about.html',
-            blog: 'blog.html',
+            friends: 'html/friends.html',
             projects: 'projects.html',
             contact: 'html/card.html',
         };
