@@ -104,7 +104,7 @@ document.querySelectorAll('.nav-dropdown .nav-btn').forEach(btn => {
         };
         const page = pageMap[target];
         if (page) {
-            window.location.href = page + (target === 'contact' ? '#contact' : '');
+            window.location.href = page;
         }
     });
 });
