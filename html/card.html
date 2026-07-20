@@ -156,11 +156,11 @@
             <span></span>
         </button>
         <div class="nav-dropdown" id="navDropdown">
-            <button class="nav-btn" style="--btn-color: #c59fda" data-target="home"><span>首页</span></button>
-            <button class="nav-btn" style="--btn-color: #3498db" data-target="about"><span>关于</span></button>
+            <button class="nav-btn" style="--btn-color: #c59fda" onclick="window.location.href='../index.html'"><span>首页</span></button>
+            <button class="nav-btn" style="--btn-color: #3498db" onclick="window.location.href='about.html'"><span>关于</span></button>
             <button class="nav-btn" style="--btn-color: #2ecc71" data-target="blog"><span>博客</span></button>
             <button class="nav-btn" style="--btn-color: #f39c12" data-target="projects"><span>项目</span></button>
-            <button class="nav-btn" style="--btn-color: #9b59b6" data-target="contact"><span>名片</span></button>
+            <button class="nav-btn" style="--btn-color: #9b59b6" onclick="window.location.href='card.html#contact'"><span>名片</span></button>
         </div>
     </nav>
 
@@ -239,30 +239,28 @@
             });
         });
 
-        // ===== 页面加载时根据 hash 显示色条 =====
+        // ===== 页面加载时显示色条 =====
         window.addEventListener('load', () => {
-            const hash = window.location.hash.replace('#', '');
-            if (hash) {
-                const colorMap = {
-                    home: '#c59fda',
-                    about: '#3498db',
-                    blog: '#2ecc71',
-                    projects: '#f39c12',
-                    contact: '#9b59b6'
-                };
-                const color = hash ? colorMap[hash] : colorMap.home;
-                if (color) {
-                    const container = document.getElementById('arrowBlocks');
-                    document.querySelectorAll('.arrow-block').forEach(el => el.remove());
-                    const block = document.createElement('div');
-                    block.className = 'arrow-block stay';
-                    block.style.setProperty('--block-color', color);
-                    block.style.background = `linear-gradient(180deg, ${color}, ${color}dd)`;
-                    block.style.left = '0';
-                    block.innerHTML = '';
-                    container.appendChild(block);
-                }
-            }
+            const config = {
+                'html/card.html': { color: '#9b59b6', type: 'vertical' }
+            };
+            const path = window.location.pathname.replace(/^.*\/page\//, '') || 'html/card.html';
+            const c = config[path] || config['html/card.html'];
+            setTimeout(() => {
+                const container = document.getElementById('arrowBlocks');
+                document.querySelectorAll('.arrow-block').forEach(el => el.remove());
+                const block = document.createElement('div');
+                block.className = 'arrow-block stay';
+                block.style.setProperty('--block-color', c.color);
+                block.style.width = '44px';
+                block.style.height = '100vh';
+                block.style.left = '0';
+                block.style.top = '-100vh';
+                block.style.bottom = 'auto';
+                block.style.background = `linear-gradient(180deg, ${c.color}, ${c.color}dd)`;
+                block.style.animation = 'arrowDrop 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards';
+                container.appendChild(block);
+            }, 600);
         });
     </script>
 </body>

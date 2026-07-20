@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>个人主页</title>
+    <title>Shion个人页</title>
     <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -16,7 +16,7 @@
         </button>
         <div class="nav-dropdown" id="navDropdown">
             <button class="nav-btn" style="--btn-color: #c59fda" data-target="home"><span>首页</span></button>
-            <button class="nav-btn" style="--btn-color: #3498db" onclick="window.location.href='html/about.html#about'"><span>关于</span></button>
+            <button class="nav-btn" style="--btn-color: #3498db" onclick="window.location.href='html/about.html'"><span>关于</span></button>
             <button class="nav-btn" style="--btn-color: #2ecc71" data-target="blog"><span>博客</span></button>
             <button class="nav-btn" style="--btn-color: #f39c12" data-target="projects"><span>项目</span></button>
             <button class="nav-btn" style="--btn-color: #9b59b6" onclick="window.location.href='html/card.html#contact'"><span>名片</span></button>
@@ -26,14 +26,14 @@
     <!-- 飞出色块的容器 -->
     <div class="arrow-blocks" id="arrowBlocks"></div>
 
-    <!-- 首页 - 全屏布局 -->
+    <!-- 首页 -->
     <div class="main-wrap">
         <div class="profile-side"></div>
         <div class="content-side">
             <div class="home-center">
                 <h1 class="home-name">Shion</h1>
                 <p class="home-sub">輝きの向こう側へ！</p>
-                <div class="home-ip" id="ipDisplay">loading...</div>
+                <p class="home-sub">迈向光辉的彼岸！</p>
             </div>
         </div>
     </div>
@@ -42,20 +42,5 @@
     </footer>
 
     <script src="js/script.js"></script>
-    <script>
-        fetch('http://ip-api.com/json/?lang=zh-CN')
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    const parts = [data.country, data.regionName].filter(Boolean);
-                    document.getElementById('ipDisplay').textContent = '欢迎来自' + parts.join('') + '的P';
-                } else {
-                    document.getElementById('ipDisplay').textContent = '不知道哪里的';
-                }
-            })
-            .catch(() => {
-                document.getElementById('ipDisplay').textContent = 'unavailable';
-            });
-    </script>
 </body>
 </html>

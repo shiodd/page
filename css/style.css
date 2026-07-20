@@ -11,13 +11,14 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
         "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    height: 100vh;
     display: flex;
     padding: 0;
     margin: 0;
     color: #333;
     line-height: 1.6;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    height: 100vh;
 }
 
 /* ========== Top Nav ========== */
@@ -164,28 +165,42 @@ body {
     }
 }
 
+@keyframes barSlideIn {
+    0% {
+        left: 100vw;
+        opacity: 0;
+        transform: scaleX(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scaleX(1.05);
+    }
+    100% {
+        left: 0;
+        opacity: 1;
+        transform: scaleX(1);
+    }
+}
+
 .arrow-block.stay {
     animation: arrowDrop 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .arrow-block.fly-out {
-    animation: arrowFlyOut 0.5s ease-in forwards;
+    animation: flyOut 0.35s ease-in forwards !important;
 }
 
-@keyframes arrowFlyOut {
+@keyframes flyOut {
     0% {
-        top: 0;
         opacity: 1;
-        transform: scaleY(1);
     }
     100% {
-        top: -100vh;
         opacity: 0;
-        transform: scaleY(0.3);
+        transform: scale(0.8);
     }
 }
 
-/* ========== Main Wrap (Full Screen) ========== */
+/* ========== Main Wrap ========== */
 .main-wrap {
     flex: 1;
     display: flex;
@@ -292,6 +307,32 @@ body {
     font-size: 1rem;
     color: #999;
     margin-bottom: 1.5rem;
+}
+
+/* ========== About Screen ========== */
+.about-screen {
+    margin-left: 420px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 4rem 3.5rem;
+    background: rgba(255, 255, 255, 0.4);
+    text-align: left;
+}
+
+.about-screen h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 1.5rem;
+}
+
+.about-screen p {
+    color: #555;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.8;
 }
 
 .home-ip {
