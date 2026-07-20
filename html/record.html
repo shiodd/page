@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>记录 · Shion</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <style>
+        .record-page {
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 2rem;
+        }
+
+        .record-wrap {
+            max-width: 640px;
+            width: 100%;
+        }
+
+        .record-wrap h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 1.5rem;
+        }
+
+        .record-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .record-item .dot {
+            flex-shrink: 0;
+            width: 12px;
+            height: 12px;
+            margin-top: 0.4rem;
+            background: #D162CB;
+        }
+
+        .record-item .date {
+            font-size: 0.85rem;
+            color: #999;
+            font-weight: 500;
+            min-width: 88px;
+            flex-shrink: 0;
+        }
+
+        .record-item .text {
+            color: #555;
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航与飞出色块由 ../js/script.js 统一注入 -->
+
+    <div class="record-page">
+        <div class="record-wrap">
+            <h2>记录</h2>
+            <div id="recordList"></div>
+        </div>
+    </div>
+
+    <script src="../js/script.js"></script>
+    <script>
+        const recordData = [
+            { date: '2026.07.20', text: '新建了记录页面。' },
+            { date: '2026.07.19', text: '更新了个人主页的配色。' },
+            { date: '2026.07.18', text: '添加了名片翻转效果。' },
+        ];
+
+        const list = document.getElementById('recordList');
+        recordData.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'record-item';
+            el.innerHTML = `
+                <span class="dot"></span>
+                <span class="date">${item.date}</span>
+                <span class="text">${item.text}</span>
+            `;
+            list.appendChild(el);
+        });
+    </script>
+</body>
+</html>

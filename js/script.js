@@ -5,20 +5,20 @@
 const NAV_ITEMS = [
     { label: '首页',   href: 'index.html' },
     { label: '关于',   href: 'html/about.html' },
-    { label: '名片墙', href: 'html/friends.html' },
-    { label: '项目',   target: 'projects' },
+    { label: '记录',   href: 'html/record.html' },
     { label: '名片',   href: 'html/card.html' },
+    { label: '名片墙', href: 'html/friends.html' },
 ];
 
-const NAV_COLORS = ['#c59fda', '#3498db', '#2ecc71', '#f39c12', '#9b59b6'];
+const NAV_COLORS = ['#c59fda', '#006AB6', '#D162CB', '#ffbad6', '#F3983B'];
 
 // 各页面对应的色条配置
 const pageConfig = {
     'index.html':        { color: '#c59fda', type: 'vertical',   left: '420px' },
-    'about.html':        { color: '#3498db', type: 'horizontal' },
-    'html/about.html':   { color: '#3498db', type: 'horizontal' },
-    'html/card.html':    { color: '#9b59b6', type: 'vertical',   left: '0' },
-    'html/friends.html': { color: '#2ecc71', type: 'vertical',   left: '0' },
+    'html/about.html':   { color: '#006AB6', type: 'horizontal' },
+    'html/card.html':    { color: '#ffbad6', type: 'vertical',   left: '0' },
+    'html/friends.html': { color: '#F3983B', type: 'vertical',   left: '0' },
+    'html/record.html':  { color: '#D162CB', type: 'vertical',   left: '0' },
 };
 
 // 根据当前页面把“相对根目录的 href”解析为真实的相对路径
@@ -176,9 +176,8 @@ function initNav() {
                 const pageMap = {
                     home: 'index.html',
                     about: 'html/about.html',
-                    friends: 'html/friends.html',
-                    projects: 'projects.html',
-                    contact: 'html/card.html',
+                friends: 'html/friends.html',
+                contact: 'html/card.html',
                 };
                 url = pageMap[target] || null;
             }
