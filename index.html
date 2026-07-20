@@ -16,7 +16,7 @@
         </button>
         <div class="nav-dropdown" id="navDropdown">
             <button class="nav-btn" style="--btn-color: #c59fda" data-target="home"><span>首页</span></button>
-            <button class="nav-btn" style="--btn-color: #3498db" data-target="about"><span>关于</span></button>
+            <button class="nav-btn" style="--btn-color: #3498db" onclick="window.location.href='html/about.html#about'"><span>关于</span></button>
             <button class="nav-btn" style="--btn-color: #2ecc71" data-target="blog"><span>博客</span></button>
             <button class="nav-btn" style="--btn-color: #f39c12" data-target="projects"><span>项目</span></button>
             <button class="nav-btn" style="--btn-color: #9b59b6" onclick="window.location.href='html/card.html#contact'"><span>名片</span></button>
@@ -26,53 +26,36 @@
     <!-- 飞出色块的容器 -->
     <div class="arrow-blocks" id="arrowBlocks"></div>
 
-    <!-- 主内容 - 全屏布局 -->
+    <!-- 首页 - 全屏布局 -->
     <div class="main-wrap">
-        <!-- 左侧：背景图片 -->
         <div class="profile-side"></div>
-
-        <!-- 右侧：内容 -->
         <div class="content-side">
-            <section class="section" id="about">
-                <h1>Shion</h1>
-                <p>輝きの向こう側へ！</p>
-            </section>
-
-            <section class="section" id="blog">
-                <h2>技能</h2>
-                <div class="tags">
-                    <span class="tag">HTML / CSS</span>
-                    <span class="tag">JavaScript</span>
-                    <span class="tag">React</span>
-                    <span class="tag">TypeScript</span>
-                    <span class="tag">Vue</span>
-                    <span class="tag">Node.js</span>
-                </div>
-            </section>
-
-            <section class="section" id="projects">
-                <h2>作品</h2>
-                <div class="projects">
-                    <div class="project">
-                        <h3>项目名称</h3>
-                        <p>项目的简短描述，说明功能和使用的技术栈。</p>
-                    </div>
-                    <div class="project">
-                        <h3>项目名称</h3>
-                        <p>项目的简短描述，说明功能和使用的技术栈。</p>
-                    </div>
-                    <div class="project">
-                        <h3>项目名称</h3>
-                        <p>项目的简短描述，说明功能和使用的技术栈。</p>
-                    </div>
-                </div>
-            </section>
-
-            <footer class="footer" id="contact">
-            </footer>
+            <div class="home-center">
+                <h1 class="home-name">Shion</h1>
+                <p class="home-sub">輝きの向こう側へ！</p>
+                <div class="home-ip" id="ipDisplay">loading...</div>
+            </div>
         </div>
     </div>
 
+    <footer class="footer" id="contact">
+    </footer>
+
     <script src="js/script.js"></script>
+    <script>
+        fetch('http://ip-api.com/json/?lang=zh-CN')
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const parts = [data.country, data.regionName].filter(Boolean);
+                    document.getElementById('ipDisplay').textContent = parts.join('');
+                } else {
+                    document.getElementById('ipDisplay').textContent = '不知道哪里的';
+                }
+            })
+            .catch(() => {
+                document.getElementById('ipDisplay').textContent = 'unavailable';
+            });
+    </script>
 </body>
 </html>
