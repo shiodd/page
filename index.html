@@ -48,7 +48,7 @@
             .then(data => {
                 if (data.status === 'success') {
                     const parts = [data.country, data.regionName].filter(Boolean);
-                    document.getElementById('ipDisplay').textContent = parts.join('');
+                    document.getElementById('ipDisplay').textContent = '欢迎来自' + parts.join('') + '的P';
                 } else {
                     document.getElementById('ipDisplay').textContent = '不知道哪里的';
                 }
