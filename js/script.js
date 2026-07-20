@@ -16,6 +16,12 @@ function showArrowBlock(color, target) {
     block.innerHTML = '';
 
     container.appendChild(block);
+
+    // 汉堡按钮同步变色
+    if (toggle) {
+        toggle.style.background = color;
+        toggle.style.setProperty('--toggle-color', '#fff');
+    }
 }
 
 // 汉堡菜单开关
@@ -66,7 +72,7 @@ window.addEventListener('load', () => {
     const hash = window.location.hash.replace('#', '');
     if (hash) {
         const colorMap = {
-            home: '#e74c3c',
+            home: '#c59fda',
             about: '#3498db',
             blog: '#2ecc71',
             projects: '#f39c12',
