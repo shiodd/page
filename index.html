@@ -15,91 +15,74 @@
             <span></span>
         </button>
         <div class="nav-dropdown" id="navDropdown">
-            <button class="nav-btn" style="--btn-color: #e74c3c" data-target="home">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
-                <span>首页</span>
-            </button>
-            <button class="nav-btn" style="--btn-color: #3498db" data-target="about">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                <span>关于</span>
-            </button>
-            <button class="nav-btn" style="--btn-color: #2ecc71" data-target="blog">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-                <span>博客</span>
-            </button>
-            <button class="nav-btn" style="--btn-color: #f39c12" data-target="projects">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 14v3h-3v2h3v3h2v-3h3v-2h-3v-3h-2zm-9-3c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm0 4c2 0 6 1 6 3v1H4v-1c0-2 4-3 6-3z"/></svg>
-                <span>项目</span>
-            </button>
-            <button class="nav-btn" style="--btn-color: #9b59b6" onclick="window.location.href='html/card.html#contact'">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-                <span>名片</span>
-            </button>
+            <button class="nav-btn" style="--btn-color: #e74c3c" data-target="home"><span>首页</span></button>
+            <button class="nav-btn" style="--btn-color: #3498db" data-target="about"><span>关于</span></button>
+            <button class="nav-btn" style="--btn-color: #2ecc71" data-target="blog"><span>博客</span></button>
+            <button class="nav-btn" style="--btn-color: #f39c12" data-target="projects"><span>项目</span></button>
+            <button class="nav-btn" style="--btn-color: #9b59b6" onclick="window.location.href='html/card.html#contact'"><span>名片</span></button>
         </div>
     </nav>
 
     <!-- 飞出色块的容器 -->
     <div class="arrow-blocks" id="arrowBlocks"></div>
 
-    <!-- 主内容 -->
-    <div class="wrapper">
-        <div class="container">
-            <!-- 左侧：头像 & 个人信息 -->
-            <div class="profile-side">
-                <div class="avatar">
-                    <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Felix" alt="头像" />
-                </div>
-                <h1 class="name">张三</h1>
-                <p class="bio">前端开发者 / 设计爱好者</p>
-                <div class="socials">
-                    <a href="#" title="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg></a>
-                    <a href="#" title="微博"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.739 5.443zM7.394 18.96c-.162.728.103 1.014.594.633.492-.38.759-1.068.595-1.527-.164-.458-.716-.494-.593-.012.12.48.034.187-.001.503-.034.306-.198.317-.595.403zM9.99 19.518c.183.421.662.565 1.069.32.406-.244.587-.757.404-1.144-.183-.387-.64-.483-1.02-.214-.38.27-.637.616-.453 1.038zM12.464 7.292c1.264-.11 2.316-.663 2.35-1.236.034-.572-.957-.95-2.222-.841-1.264.11-2.317.663-2.35 1.236-.034.572.957.95 2.222.841zM10.803 5.556c.653-.08 1.176-.396 1.168-.706-.008-.31-.543-.498-1.196-.419-.653.08-1.176.396-1.168.706.008.31.543.498 1.196.419z"/><path d="M16.875 4.043c1.908-.166 3.461-.946 3.468-1.74.007-.794-1.517-1.3-3.425-1.134-1.908.167-3.461.947-3.468 1.741-.007.794 1.517 1.299 3.425 1.133zM15.785 2.998c.654-.065 1.18-.322 1.174-.576-.006-.254-.542-.406-1.196-.342-.654.065-1.18.322-1.174.576.006.254.542.407 1.196.342z"/></svg></a>
-                    <a href="#" title="Twitter / X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
-                    <a href="#" title="Email"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></a>
-                </div>
+    <!-- 主内容 - 全屏布局 -->
+    <div class="main-wrap">
+        <!-- 左侧：头像 & 个人信息 -->
+        <div class="profile-side">
+            <div class="avatar">
+                <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=Felix" alt="头像" />
             </div>
-
-            <!-- 右侧：内容 -->
-            <div class="content-side">
-                <section class="section" id="about">
-                    <h2>关于我</h2>
-                    <p>热爱技术，喜欢用代码创造美好的事物。目前专注于 Web 前端开发，偶尔也写写后端。业余时间喜欢摄影、阅读和户外运动。</p>
-                </section>
-
-                <section class="section" id="blog">
-                    <h2>技能</h2>
-                    <div class="tags">
-                        <span class="tag">HTML / CSS</span>
-                        <span class="tag">JavaScript</span>
-                        <span class="tag">React</span>
-                        <span class="tag">TypeScript</span>
-                        <span class="tag">Vue</span>
-                        <span class="tag">Node.js</span>
-                    </div>
-                </section>
-
-                <section class="section" id="projects">
-                    <h2>作品</h2>
-                    <div class="projects">
-                        <div class="project">
-                            <h3>项目名称</h3>
-                            <p>项目的简短描述，说明功能和使用的技术栈。</p>
-                        </div>
-                        <div class="project">
-                            <h3>项目名称</h3>
-                            <p>项目的简短描述，说明功能和使用的技术栈。</p>
-                        </div>
-                        <div class="project">
-                            <h3>项目名称</h3>
-                            <p>项目的简短描述，说明功能和使用的技术栈。</p>
-                        </div>
-                    </div>
-                </section>
-
-                <footer class="footer" id="contact">
-                    <p>&copy; 2026 张三 · Made with ❤</p>
-                </footer>
+            <h1 class="name">张三</h1>
+            <p class="bio">前端开发者 / 设计爱好者</p>
+            <div class="socials">
+                <a href="#" title="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg></a>
+                <a href="#" title="微博"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.739 5.443zM7.394 18.96c-.162.728.103 1.014.594.633.492-.38.759-1.068.595-1.527-.164-.458-.716-.494-.593-.012.12.48.034.187-.001.503-.034.306-.198.317-.595.403zM9.99 19.518c.183.421.662.565 1.069.32.406-.244.587-.757.404-1.144-.183-.387-.64-.483-1.02-.214-.38.27-.637.616-.453 1.038zM12.464 7.292c1.264-.11 2.316-.663 2.35-1.236.034-.572-.957-.95-2.222-.841-1.264.11-2.317.663-2.35 1.236-.034.572.957.95 2.222.841zM10.803 5.556c.653-.08 1.176-.396 1.168-.706-.008-.31-.543-.498-1.196-.419-.653.08-1.176.396-1.168.706.008.31.543.498 1.196.419z"/><path d="M16.875 4.043c1.908-.166 3.461-.946 3.468-1.74.007-.794-1.517-1.3-3.425-1.134-1.908.167-3.461.947-3.468 1.741-.007.794 1.517 1.299 3.425 1.133zM15.785 2.998c.654-.065 1.18-.322 1.174-.576-.006-.254-.542-.406-1.196-.342-.654.065-1.18.322-1.174.576.006.254.542.407 1.196.342z"/></svg></a>
+                <a href="#" title="Twitter / X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+                <a href="#" title="Email"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></a>
             </div>
+        </div>
+
+        <!-- 右侧：内容 -->
+        <div class="content-side">
+            <section class="section" id="about">
+                <h2>关于我</h2>
+                <p>热爱技术，喜欢用代码创造美好的事物。目前专注于 Web 前端开发，偶尔也写写后端。业余时间喜欢摄影、阅读和户外运动。</p>
+            </section>
+
+            <section class="section" id="blog">
+                <h2>技能</h2>
+                <div class="tags">
+                    <span class="tag">HTML / CSS</span>
+                    <span class="tag">JavaScript</span>
+                    <span class="tag">React</span>
+                    <span class="tag">TypeScript</span>
+                    <span class="tag">Vue</span>
+                    <span class="tag">Node.js</span>
+                </div>
+            </section>
+
+            <section class="section" id="projects">
+                <h2>作品</h2>
+                <div class="projects">
+                    <div class="project">
+                        <h3>项目名称</h3>
+                        <p>项目的简短描述，说明功能和使用的技术栈。</p>
+                    </div>
+                    <div class="project">
+                        <h3>项目名称</h3>
+                        <p>项目的简短描述，说明功能和使用的技术栈。</p>
+                    </div>
+                    <div class="project">
+                        <h3>项目名称</h3>
+                        <p>项目的简短描述，说明功能和使用的技术栈。</p>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="footer" id="contact">
+                <p>&copy; 2026 张三 · Made with ❤</p>
+            </footer>
         </div>
     </div>
 
