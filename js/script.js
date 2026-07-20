@@ -1,8 +1,7 @@
 // ========== 统一导航栏 ==========
 // 各页面只需引入本脚本，导航与飞出色块会自动注入；无需再手写 nav DOM。
 
-// 导航项（label + 跳转目标）。带 data-target 的同页跳转（项目/博客）由脚本处理；
-// 其余用 window.location.href 跳转。
+// 导航项（label + 跳转目标）。带 data-target 的同页跳转由脚本处理；其余跨页跳转。
 const NAV_ITEMS = [
     { label: '首页',   href: 'index.html' },
     { label: '关于',   href: 'html/about.html' },
@@ -10,6 +9,8 @@ const NAV_ITEMS = [
     { label: '项目',   target: 'projects' },
     { label: '名片',   href: 'html/card.html' },
 ];
+
+const NAV_COLORS = ['#c59fda', '#3498db', '#2ecc71', '#f39c12', '#9b59b6'];
 
 // 各页面对应的色条配置
 const pageConfig = {
@@ -40,11 +41,11 @@ function injectNav() {
             <span></span><span></span><span></span>
         </button>
         <div class="nav-dropdown" id="navDropdown">
-            ${NAV_ITEMS.map(item => {
+            ${NAV_ITEMS.map((item, i) => {
                 const attr = item.href
-                    ? `onclick="window.location.href='${resolveHref(item.href)}'"`
+                    ? `data-href="${item.href}"`
                     : `data-target="${item.target}"`;
-                return `<button class="nav-btn" style="--btn-color:${item.color}" ${attr}><span>${item.label}</span></button>`;
+                return `<button class="nav-btn" style="--btn-color:${NAV_COLORS[i]}" ${attr}><span>${item.label}</span></button>`;
             }).join('')}
         </div>
     `;
@@ -58,11 +59,6 @@ function injectNav() {
     }
 }
 
-// 各按钮颜色（注入时写入，便于脚本读取）
-NAV_ITEMS.forEach((it, i) => {
-    it.color = ['#c59fda', '#3498db', '#2ecc71', '#f39c12', '#9b59b6'][i];
-});
-
 // ========== 飞出色块 ==========
 function getCurrentPage() {
     const path = window.location.pathname.replace(/^.*\/page\//, '') || 'index.html';
@@ -70,6 +66,7 @@ function getCurrentPage() {
 }
 
 function showArrowBlock(color, type, leftPos) {
+    // 旧色块先飞走（用于同页刷新色条）
     document.querySelectorAll('.arrow-block').forEach(el => {
         el.classList.remove('stay');
         el.classList.add('fly-out');
@@ -79,26 +76,23 @@ function showArrowBlock(color, type, leftPos) {
         document.querySelectorAll('.arrow-block').forEach(el => el.remove());
 
         const block = document.createElement('div');
-        block.className = 'arrow-block stay';
+        block.className = 'arrow-block stay ' + (type || 'vertical');
         block.style.setProperty('--block-color', color);
-        block.innerHTML = '';
+        block.style.background = `linear-gradient(${type === 'horizontal' ? '90deg' : '180deg'}, ${color}, ${color}dd)`;
 
+        // 基础定位始终在屏内，飞入/飞出完全由 transform 动画控制
         if (type === 'horizontal') {
             block.style.width = '100vw';
             block.style.height = '44px';
-            block.style.left = '100vw';
+            block.style.left = '0';
             block.style.top = 'auto';
             block.style.bottom = '0';
-            block.style.background = `linear-gradient(90deg, ${color}, ${color}dd)`;
-            block.style.animation = 'barSlideIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards';
         } else {
             block.style.width = '44px';
             block.style.height = '100vh';
             block.style.left = leftPos || '420px';
-            block.style.top = '-100vh';
+            block.style.top = '0';
             block.style.bottom = 'auto';
-            block.style.background = `linear-gradient(180deg, ${color}, ${color}dd)`;
-            block.style.animation = 'arrowDrop 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards';
         }
 
         document.getElementById('arrowBlocks').appendChild(block);
@@ -109,6 +103,25 @@ function showArrowBlock(color, type, leftPos) {
             toggle.style.setProperty('--toggle-color', '#fff');
         }
     }, 400);
+}
+
+// 让当前色块播放飞走动画（由多到少 + 飞出），并复位汉堡按钮颜色
+function flyOutCurrentBlock() {
+    document.querySelectorAll('.arrow-block').forEach(el => {
+        el.classList.remove('stay');
+        el.classList.add('fly-out');
+    });
+    const toggle = document.getElementById('navToggle');
+    if (toggle) {
+        toggle.style.background = '';
+        toggle.style.removeProperty('--toggle-color');
+    }
+}
+
+// 先播放飞走动画，再跳转（用于切换页面）
+function goPage(url) {
+    flyOutCurrentBlock();
+    setTimeout(() => { window.location.href = url; }, 450);
 }
 
 // ========== 名片翻转（可复用） ==========
@@ -142,39 +155,36 @@ function initNav() {
         btn.addEventListener('click', function () {
             const color = this.style.getPropertyValue('--btn-color').trim();
             const target = this.dataset.target;
+            const href = this.dataset.href;
 
             // 关闭菜单
             dropdown.classList.remove('open');
             toggle.classList.remove('active');
 
-            // 旧色块立即飞走
-            document.querySelectorAll('.arrow-block').forEach(el => {
-                el.classList.remove('stay');
-                el.classList.add('fly-out');
-            });
-            setTimeout(() => {
-                document.querySelectorAll('.arrow-block').forEach(el => el.remove());
-            }, 500);
-
-            // 同页跳转（项目/博客）
-            const section = document.getElementById(target);
-            if (section) {
-                section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // 同页锚点跳转（存在对应区块时）
+            if (target && document.getElementById(target)) {
+                document.getElementById(target).scrollIntoView({ behavior: 'smooth', block: 'center' });
                 setTimeout(() => showArrowBlock(color, getCurrentPage().type, getCurrentPage().left), 400);
                 return;
             }
 
-            // 跨页跳转
-            const pageMap = {
-                home: 'index.html',
-                about: 'html/about.html',
-                friends: 'html/friends.html',
-                projects: 'projects.html',
-                contact: 'html/card.html',
-            };
-            const page = pageMap[target];
-            if (page) {
-                window.location.href = page;
+            // 跨页跳转：先飞走色块，再跳转
+            let url = null;
+            if (href) {
+                url = resolveHref(href);
+            } else if (target) {
+                const pageMap = {
+                    home: 'index.html',
+                    about: 'html/about.html',
+                    friends: 'html/friends.html',
+                    projects: 'projects.html',
+                    contact: 'html/card.html',
+                };
+                url = pageMap[target] || null;
+            }
+
+            if (url) {
+                goPage(url);
             }
         });
     });

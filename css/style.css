@@ -136,9 +136,11 @@ body {
     overflow: hidden;
 }
 
+/* 色块基础定位始终在屏内，飞入/飞出完全由 transform 动画控制，
+   避免依赖 top/left 关键帧导致切换动画时瞬间弹回屏外 */
 .arrow-block {
     position: absolute;
-    top: -100vh;
+    top: 0;
     left: 0;
     width: 44px;
     height: 100vh;
@@ -150,58 +152,73 @@ body {
     color: #fff;
     font-size: 0.85rem;
     font-weight: 600;
+}
+
+/* 进入：由少到多（scale 展开）+ 从屏外飞入 */
+.arrow-block.stay {
     animation: arrowDrop 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.arrow-block.horizontal.stay {
+    animation: barSlideIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* 飞出：由多到少（scale 收缩）+ 飞出屏幕，与进入对称反向 */
+.arrow-block.vertical.fly-out {
+    animation: flyOutDown 0.4s ease-in forwards;
+}
+
+.arrow-block.horizontal.fly-out {
+    animation: flyOutLeft 0.4s ease-in forwards;
 }
 
 @keyframes arrowDrop {
     0% {
-        top: -100vh;
         opacity: 0;
-        transform: scaleY(0.3);
+        transform: translateY(-110vh) scaleY(0.3);
     }
-    50% {
+    60% {
         opacity: 1;
-        transform: scaleY(1.05);
     }
     100% {
-        top: 0;
         opacity: 1;
-        transform: scaleY(1);
+        transform: translateY(0) scaleY(1);
     }
 }
 
 @keyframes barSlideIn {
     0% {
-        left: 100vw;
         opacity: 0;
-        transform: scaleX(0.3);
+        transform: translateX(110vw) scaleX(0.3);
     }
-    50% {
+    60% {
         opacity: 1;
-        transform: scaleX(1.05);
     }
     100% {
-        left: 0;
         opacity: 1;
-        transform: scaleX(1);
+        transform: translateX(0) scaleX(1);
     }
 }
 
-.arrow-block.stay {
-    animation: arrowDrop 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.arrow-block.fly-out {
-    animation: flyOut 0.35s ease-in forwards !important;
-}
-
-@keyframes flyOut {
+@keyframes flyOutDown {
     0% {
         opacity: 1;
+        transform: translateY(0) scaleY(1);
     }
     100% {
         opacity: 0;
-        transform: scale(0.8);
+        transform: translateY(110vh) scaleY(0);
+    }
+}
+
+@keyframes flyOutLeft {
+    0% {
+        opacity: 1;
+        transform: translateX(0) scaleX(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-110vw) scaleX(0);
     }
 }
 
