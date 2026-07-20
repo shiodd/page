@@ -4,10 +4,10 @@ const dropdown = document.getElementById('navDropdown');
 
 // 色条配置：每个页面对应的颜色和色条类型
 const pageConfig = {
-    'index.html':       { color: '#c59fda', type: 'vertical' },
+    'index.html':       { color: '#c59fda', type: 'vertical', left: '420px' },
     'html/about.html':  { color: '#3498db', type: 'horizontal' },
-    'html/card.html':   { color: '#9b59b6', type: 'vertical' },
-    'html/friends.html': { color: '#2ecc71', type: 'vertical' },
+    'html/card.html':   { color: '#9b59b6', type: 'vertical', left: '0' },
+    'html/friends.html': { color: '#2ecc71', type: 'vertical', left: '0' },
 };
 
 // 获取当前页面的配置
@@ -17,7 +17,7 @@ function getCurrentPage() {
 }
 
 // 创建/切换色块
-function showArrowBlock(color, type) {
+function showArrowBlock(color, type, leftPos) {
     document.querySelectorAll('.arrow-block').forEach(el => {
         el.classList.remove('stay');
         el.classList.add('fly-out');
@@ -41,10 +41,10 @@ function showArrowBlock(color, type) {
             block.style.background = `linear-gradient(90deg, ${color}, ${color}dd)`;
             block.style.animation = 'barSlideIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards';
         } else {
-            // 竖向色条：从上往下飞入，停在图片右侧
+            // 竖向色条：从上往下飞入
             block.style.width = '44px';
             block.style.height = '100vh';
-            block.style.left = '420px';
+            block.style.left = leftPos || '420px';
             block.style.top = '-100vh';
             block.style.bottom = 'auto';
             block.style.background = `linear-gradient(180deg, ${color}, ${color}dd)`;
@@ -90,7 +90,7 @@ document.querySelectorAll('.nav-dropdown .nav-btn').forEach(btn => {
         const section = document.getElementById(target);
         if (section) {
             section.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(() => showArrowBlock(color, getCurrentPage().type), 400);
+            setTimeout(() => showArrowBlock(color, getCurrentPage().type, getCurrentPage().left), 400);
             return;
         }
 
@@ -111,7 +111,8 @@ document.querySelectorAll('.nav-dropdown .nav-btn').forEach(btn => {
 
 // 页面加载时显示对应色条（card.html 自己处理）
 window.addEventListener('load', () => {
-    if (window.location.pathname.includes('card.html')) return;
     const config = getCurrentPage();
-    setTimeout(() => showArrowBlock(config.color, config.type), 600);
+    if (config) {
+        setTimeout(() => showArrowBlock(config.color, config.type, config.left), 600);
+    }
 });

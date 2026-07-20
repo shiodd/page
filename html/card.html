@@ -21,6 +21,14 @@
             max-width: 700px;
             width: 100%;
             padding: 3rem 2rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease 0.4s forwards;
+        }
+
+        @keyframes fadeInUp {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
 
         /* 返回按钮 */
@@ -30,7 +38,7 @@
             gap: 0.5rem;
             padding: 0.6rem 1.2rem;
             border: none;
-            background: #1a1a2e;
+            background: #9b59b6;
             color: #fff;
             font-size: 0.95rem;
             font-weight: 500;
@@ -46,7 +54,7 @@
         }
 
         .card-page .back-btn:hover {
-            background: #333;
+            background: #7d3c98;
         }
 
         /* 时间线 */
@@ -239,29 +247,7 @@
             });
         });
 
-        // ===== 页面加载时显示色条 =====
-        window.addEventListener('load', () => {
-            const config = {
-                'html/card.html': { color: '#9b59b6', type: 'vertical' }
-            };
-            const path = window.location.pathname.replace(/^.*\/page\//, '') || 'html/card.html';
-            const c = config[path] || config['html/card.html'];
-            setTimeout(() => {
-                const container = document.getElementById('arrowBlocks');
-                document.querySelectorAll('.arrow-block').forEach(el => el.remove());
-                const block = document.createElement('div');
-                block.className = 'arrow-block stay';
-                block.style.setProperty('--block-color', c.color);
-                block.style.width = '44px';
-                block.style.height = '100vh';
-                block.style.left = '0';
-                block.style.top = '-100vh';
-                block.style.bottom = 'auto';
-                block.style.background = `linear-gradient(180deg, ${c.color}, ${c.color}dd)`;
-                block.style.animation = 'arrowDrop 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards';
-                container.appendChild(block);
-            }, 600);
-        });
+
     </script>
 </body>
 </html>
