@@ -75,6 +75,53 @@
             margin-bottom: 0;
         }
 
+        /* 随笔配图 */
+        .record-item .gallery {
+            margin-top: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .record-item .gallery img {
+            width: 160px;
+            max-width: 100%;
+            height: auto;
+            display: block;
+            flex: 0 0 auto;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            cursor: zoom-in;
+        }
+
+        /* 点击放大遮罩 */
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.82);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s ease;
+            z-index: 200;
+            cursor: zoom-out;
+        }
+
+        .lightbox.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .lightbox img {
+            max-width: 90vw;
+            max-height: 90vh;
+            width: auto;
+            height: auto;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+        }
+
         @media (max-width: 480px) {
             .record-page {
                 padding: 2rem 1.25rem;
@@ -95,12 +142,24 @@
         </div>
     </div>
 
+    <!-- 图片点击放大 -->
+    <div class="lightbox" id="lightbox"><img alt="放大图" /></div>
+
     <script src="../js/script.js"></script>
     <!-- 随笔数据在 HTML 外维护：data/records.js（定义全局 recordData） -->
     <script src="data/records.js"></script>
     <script>
-        // 数据来自 ../js/records.js，这里只负责渲染
+        // 数据来自 data/records.js，这里只负责渲染
         const list = document.getElementById('recordList');
+
+        // 图片点击放大（lightbox）
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = lightbox.querySelector('img');
+        lightbox.addEventListener('click', (e) => {
+            // 只有点击遮罩背景（而非大图本身）才关闭，避免点图时冒泡误关
+            if (e.target === lightbox) lightbox.classList.remove('open');
+        });
+
         recordData.forEach((item, i) => {
             const el = document.createElement('div');
             el.className = 'record-item';
@@ -128,6 +187,23 @@
             });
 
             el.append(head, text);
+
+            if (item.images && item.images.length) {
+                const gallery = document.createElement('div');
+                gallery.className = 'gallery';
+                item.images.forEach(src => {
+                    const img = document.createElement('img');
+                    img.src = src;
+                    img.alt = item.title || '';
+                    img.addEventListener('click', () => {
+                        lightboxImg.src = src;
+                        lightbox.classList.add('open');
+                    });
+                    gallery.appendChild(img);
+                });
+                el.appendChild(gallery);
+            }
+
             list.appendChild(el);
         });
     </script>
