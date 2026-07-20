@@ -70,17 +70,15 @@ document.querySelectorAll('.nav-dropdown .nav-btn').forEach(btn => {
 // 页面加载时检查 hash，恢复色块（跨页跳转后）
 window.addEventListener('load', () => {
     const hash = window.location.hash.replace('#', '');
-    if (hash) {
-        const colorMap = {
-            home: '#c59fda',
-            about: '#3498db',
-            blog: '#2ecc71',
-            projects: '#f39c12',
-            contact: '#9b59b6'
-        };
-        const color = colorMap[hash];
-        if (color) showArrowBlock(color, hash);
-    }
+    const colorMap = {
+        home: '#c59fda',
+        about: '#3498db',
+        blog: '#2ecc71',
+        projects: '#f39c12',
+        contact: '#9b59b6'
+    };
+    const color = hash ? colorMap[hash] : colorMap.home;
+    if (color) showArrowBlock(color, hash || 'home');
 });
 
 

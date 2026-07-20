@@ -248,7 +248,7 @@
                     projects: '#f39c12',
                     contact: '#9b59b6'
                 };
-                const color = colorMap[hash];
+                const color = hash ? colorMap[hash] : colorMap.home;
                 if (color) {
                     const container = document.getElementById('arrowBlocks');
                     document.querySelectorAll('.arrow-block').forEach(el => el.remove());

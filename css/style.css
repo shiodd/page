@@ -196,6 +196,13 @@ body {
     width: 420px;
     flex-shrink: 0;
     background: url('../image/index/index.png') center / cover no-repeat;
+    opacity: 0;
+    animation: fadeIn 0.6s ease 0.15s forwards;
+}
+
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
 }
 
 .profile-side .avatar {
@@ -264,6 +271,20 @@ body {
     flex-direction: column;
     justify-content: center;
     background: rgba(255, 255, 255, 0.6);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s ease 0.4s forwards;
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* ========== Name & Bio ========== */
