@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>名片 · 张三</title>
+    <title>名片 · Shion</title>
     <link rel="stylesheet" href="../css/style.css" />
     <style>
+        /* 背景颜色统一交给全局 css/style.css 的 body 定义，
+           此处仅覆盖布局相关属性（允许滚动 + 居中卡片）。 */
         body {
             min-height: 100vh;
             height: auto;
@@ -13,7 +15,6 @@
             justify-content: center;
             align-items: center;
             padding: 2rem 1rem;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             overflow: auto;
         }
 
