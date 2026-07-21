@@ -301,6 +301,9 @@ body::before {
     font-weight: 500;
     white-space: nowrap;
     transition: all 0.2s ease;
+    /* 文本不可选中 */
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .nav-dropdown .nav-btn span {
