@@ -12,6 +12,10 @@ const NAV_ITEMS = [
 
 const NAV_COLORS = ['#c59fda', '#006AB6', '#D162CB', '#ffbad6', '#F3983B'];
 
+// 主题切换图标（用 currentColor，自动跟随主题深浅）
+const ICON_MOON = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+const ICON_SUN = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+
 // ========== 音效 ==========
 // 根据当前所在目录解析音频相对路径（与 resolveHref 逻辑一致）
 const SFX_BASE = /\/html\//.test(window.location.pathname) ? '../sound/sfx/' : 'sound/sfx/';
@@ -48,6 +52,10 @@ function injectNav() {
     nav.className = 'top-nav';
     nav.id = 'topNav';
     nav.innerHTML = `
+        <button class="theme-toggle-btn" id="themeToggle" aria-label="切换主题">
+            <span class="icon icon-moon">${ICON_MOON}</span>
+            <span class="icon icon-sun">${ICON_SUN}</span>
+        </button>
         <button class="nav-toggle" id="navToggle" aria-label="菜单">
             <span></span><span></span><span></span>
         </button>
@@ -205,13 +213,41 @@ function initNav() {
                 goPage(url);
             }
         });
+
+        // 主题切换按钮（夜间模式）
+        const themeBtn = document.getElementById('themeToggle');
+        if (themeBtn) {
+            themeBtn.addEventListener('click', () => {
+                playSfx(sfxClick);
+                const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+                applyTheme(next);
+            });
+        }
     });
+}
+
+// ========== 主题切换（夜间模式） ==========
+function setThemeAttr(theme) {
+    document.documentElement.dataset.theme = theme;
+}
+
+function applyTheme(theme) {
+    setThemeAttr(theme);
+    try { localStorage.setItem('theme', theme); } catch (e) {}
+}
+
+function initTheme() {
+    let saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setThemeAttr(saved || (prefersDark ? 'dark' : 'light'));
 }
 
 // ========== 初始化 ==========
 window.addEventListener('load', () => {
     injectNav();
     initNav();
+    initTheme();
     bindCardFlip();
 
     const config = getCurrentPage();

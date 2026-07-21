@@ -1,3 +1,36 @@
+/* ========== Theme Variables ========== */
+:root {
+    --bg-grad: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    --text: #333;
+    --text-strong: #1a1a2e;
+    --text-soft: #555;
+    --text-muted: #999;
+    --surface: rgba(255, 255, 255, 0.85);
+    --surface-strong: rgba(255, 255, 255, 0.9);
+    --surface-soft: rgba(255, 255, 255, 0.6);
+    --surface-faint: rgba(255, 255, 255, 0.4);
+    --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.1);
+    --tag-bg: #eef0f5;
+    --tag-text: #1a1a2e;
+}
+
+[data-theme="dark"] {
+    --bg-grad: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    --text: #e8e8ef;
+    --text-strong: #f0f0f7;
+    --text-soft: #c2c7d6;
+    --text-muted: #9aa0b4;
+    --surface: rgba(40, 42, 60, 0.85);
+    --surface-strong: rgba(48, 50, 70, 0.9);
+    --surface-soft: rgba(30, 32, 48, 0.6);
+    --surface-faint: rgba(30, 32, 48, 0.4);
+    --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.45);
+    --tag-bg: #2a2c3e;
+    --tag-text: #e8e8ef;
+}
+
 /* ========== Reset & Base ========== */
 *,
 *::before,
@@ -10,15 +43,16 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
         "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background: var(--bg-grad);
     display: flex;
     padding: 0;
     margin: 0;
-    color: #333;
+    color: var(--text);
     line-height: 1.6;
     overflow-x: hidden;
     overflow-y: hidden;
     height: 100vh;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 /* ========== Top Nav ========== */
@@ -27,6 +61,10 @@ body {
     top: 1.5rem;
     right: 1.5rem;
     z-index: 100;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.6rem;
 }
 
 /* 汉堡按钮 */
@@ -35,7 +73,7 @@ body {
     height: 44px;
     border: none;
     border-radius: 0;
-    background: rgba(255, 255, 255, 0.85);
+    background: var(--surface);
     backdrop-filter: blur(8px);
     cursor: pointer;
     display: flex;
@@ -43,27 +81,27 @@ body {
     align-items: center;
     justify-content: center;
     gap: 5px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow);
     transition: background 0.25s, box-shadow 0.25s;
     position: relative;
     z-index: 110;
 }
 
 .nav-toggle:hover {
-    background: #fff !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    background: var(--surface-strong) !important;
+    box-shadow: var(--shadow);
 }
 
-/* 悬停时覆盖 JS 注入的彩色背景与白色色条，变回白色底 + 深色条 */
+/* 悬停时覆盖 JS 注入的彩色背景，跟随主题色（浅色深条 / 深色浅条） */
 .nav-toggle:hover span {
-    background: #333 !important;
+    background: var(--text) !important;
 }
 
 .nav-toggle span {
     display: block;
     width: 20px;
     height: 2.5px;
-    background: var(--toggle-color, #333);
+    background: var(--toggle-color, var(--text));
     border-radius: 0;
     transition: all 0.3s ease;
     transform-origin: center;
@@ -80,6 +118,63 @@ body {
     transform: translateY(-7.5px) rotate(-45deg);
 }
 
+/* 主题切换按钮（太阳/月亮） */
+.theme-toggle-btn {
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 0;
+    background: var(--surface);
+    backdrop-filter: blur(8px);
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+    color: var(--text);
+    box-shadow: var(--shadow);
+    transition: background 0.25s, box-shadow 0.25s;
+    position: relative;
+    z-index: 110;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.theme-toggle-btn:hover {
+    background: var(--surface-strong);
+    box-shadow: var(--shadow);
+}
+
+/* 主题图标：在月亮/太阳之间做淡入淡出 + 旋转缩放切换 */
+.theme-toggle-btn .icon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s ease, transform 0.4s ease;
+}
+
+.theme-toggle-btn .icon-moon {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+}
+
+.theme-toggle-btn .icon-sun {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.4);
+}
+
+[data-theme="dark"] .theme-toggle-btn .icon-moon {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.4);
+}
+
+[data-theme="dark"] .theme-toggle-btn .icon-sun {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+}
+
 /* 下拉菜单 */
 .nav-dropdown {
     position: absolute;
@@ -90,7 +185,7 @@ body {
     gap: 0;
     background: transparent;
     padding: 0;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-lg);
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.35s ease;
@@ -107,9 +202,9 @@ body {
     padding: 0.6rem 1rem;
     border: none;
     border-radius: 0;
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--surface-strong);
     cursor: pointer;
-    color: #555;
+    color: var(--text-soft);
     font-size: 0.9rem;
     font-weight: 500;
     white-space: nowrap;
@@ -117,7 +212,7 @@ body {
 }
 
 .nav-dropdown .nav-btn span {
-    color: #555;
+    color: var(--text-soft);
 }
 
 .nav-dropdown .nav-btn:hover {
@@ -312,10 +407,11 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.6);
+    background: var(--surface-soft);
     opacity: 0;
     transform: translateY(20px);
     animation: fadeInUp 0.6s ease 0.4s forwards;
+    transition: background 0.3s ease;
 }
 
 .home-center {
@@ -325,14 +421,14 @@ body {
 .home-name {
     font-size: 3rem;
     font-weight: 700;
-    color: #1a1a2e;
+    color: var(--text-strong);
     margin-bottom: 0.5rem;
     letter-spacing: 0.04em;
 }
 
 .home-sub {
     font-size: 1rem;
-    color: #999;
+    color: var(--text-muted);
     margin-bottom: 1.5rem;
 }
 
@@ -344,19 +440,20 @@ body {
     flex-direction: column;
     justify-content: center;
     padding: 4rem 3.5rem;
-    background: rgba(255, 255, 255, 0.4);
+    background: var(--surface-faint);
     text-align: left;
+    transition: background 0.3s ease;
 }
 
 .about-screen h2 {
     font-size: 1.5rem;
     font-weight: 600;
-    color: #1a1a2e;
+    color: var(--text-strong);
     margin-bottom: 1.5rem;
 }
 
 .about-screen p {
-    color: #555;
+    color: var(--text-soft);
     font-size: 1rem;
     margin-bottom: 0.5rem;
     line-height: 1.8;
@@ -364,7 +461,7 @@ body {
 
 .home-ip {
     font-size: 0.9rem;
-    color: #999;
+    color: var(--text-muted);
 }
 
 @keyframes fadeInUp {
@@ -389,21 +486,22 @@ body {
     display: inline-block;
     padding: 0.4rem 1.1rem;
     font-size: 0.9rem;
-    color: #1a1a2e;
-    background: #eef0f5;
+    color: var(--tag-text);
+    background: var(--tag-bg);
     border-radius: 0;
+    transition: all 0.2s ease;
 }
 
 .tag:hover {
-    background: #1a1a2e;
-    color: #fff;
+    background: var(--text-strong);
+    color: var(--tag-bg);
 }
 
 /* ========== Footer ========== */
 .footer {
     margin-top: 2.5rem;
     font-size: 0.85rem;
-    color: #aaa;
+    color: var(--text-muted);
 }
 
 /* ========== Responsive ========== */
@@ -429,6 +527,12 @@ body {
     .nav-toggle {
         width: 38px;
         height: 38px;
+    }
+
+    .theme-toggle-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 1rem;
     }
 
     .nav-toggle span {

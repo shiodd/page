@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>名片 · Shion</title>
     <link rel="stylesheet" href="../css/style.css" />
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('theme');
+                if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                document.documentElement.dataset.theme = t;
+            } catch (e) {}
+        })();
+    </script>
     <style>
         /* 背景颜色统一交给全局 css/style.css 的 body 定义，
            此处仅覆盖布局相关属性（允许滚动 + 居中卡片）。 */
