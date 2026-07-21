@@ -124,11 +124,57 @@
         }
 
         .lightbox img {
-            max-width: 90vw;
-            max-height: 90vh;
+            max-width: 55vw;
+            max-height: 55vh;
             width: auto;
             height: auto;
             box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+            cursor: zoom-out;
+            transition: transform 0.15s ease;
+        }
+
+        /* 放大层底部缩放控制条 */
+        .lightbox-bar {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.4rem 0.8rem;
+            background: rgba(20, 22, 34, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 0;
+            z-index: 2;
+        }
+        .lightbox-bar button {
+            width: 2rem;
+            height: 2rem;
+            border: none;
+            border-radius: 0;
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            font-size: 1.1rem;
+            line-height: 1;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+        .lightbox-bar button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .lightbox-bar #zoomReset {
+            width: auto;
+            border-radius: 0;
+            padding: 0 0.9rem;
+            font-size: 0.85rem;
+        }
+        .lightbox-bar #zoomVal {
+            min-width: 3rem;
+            text-align: center;
+            color: #fff;
+            font-size: 0.85rem;
+            user-select: none;
         }
 
         @media (max-width: 480px) {
@@ -167,7 +213,15 @@
     </div>
 
     <!-- 图片点击放大 -->
-    <div class="lightbox" id="lightbox"><img alt="放大图" /></div>
+    <div class="lightbox" id="lightbox">
+        <img alt="放大图" />
+        <div class="lightbox-bar">
+            <button type="button" id="zoomOut" title="缩小">−</button>
+            <span id="zoomVal">100%</span>
+            <button type="button" id="zoomIn" title="放大">＋</button>
+            <button type="button" id="zoomReset" title="还原">还原</button>
+        </div>
+    </div>
 
     <script src="../js/script.js"></script>
     <!-- 随笔数据在 HTML 外维护：data/records.js（定义全局 recordData） -->
@@ -179,9 +233,38 @@
         // 图片点击放大（lightbox）
         const lightbox = document.getElementById('lightbox');
         const lightboxImg = lightbox.querySelector('img');
-        lightbox.addEventListener('click', (e) => {
-            // 只有点击遮罩背景（而非大图本身）才关闭，避免点图时冒泡误关
-            if (e.target === lightbox) lightbox.classList.remove('open');
+        const zoomInBtn = document.getElementById('zoomIn');
+        const zoomOutBtn = document.getElementById('zoomOut');
+        const zoomResetBtn = document.getElementById('zoomReset');
+        const zoomVal = document.getElementById('zoomVal');
+        let zoom = 1;
+        const ZOOM_MIN = 0.4, ZOOM_MAX = 3, ZOOM_STEP = 0.2;
+        function applyZoom() {
+            lightboxImg.style.transform = 'scale(' + zoom + ')';
+            zoomVal.textContent = Math.round(zoom * 100) + '%';
+        }
+        function resetZoom() {
+            zoom = 1;
+            applyZoom();
+        }
+        lightbox.addEventListener('click', () => {
+            // 点击遮罩背景或大图本身都关闭
+            lightbox.classList.remove('open');
+            resetZoom();
+        });
+        zoomInBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            zoom = Math.min(zoom + ZOOM_STEP, ZOOM_MAX);
+            applyZoom();
+        });
+        zoomOutBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            zoom = Math.max(zoom - ZOOM_STEP, ZOOM_MIN);
+            applyZoom();
+        });
+        zoomResetBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            resetZoom();
         });
 
         recordData.forEach((item, i) => {
