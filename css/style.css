@@ -31,6 +31,47 @@
     --tag-text: #e8e8ef;
 }
 
+/* 夜间模式下降低强调色亮度，避免亮色在深色背景上刺眼 */
+[data-theme="dark"] .arrow-block {
+    filter: brightness(0.62) saturate(0.85);
+}
+[data-theme="dark"] .nav-toggle {
+    filter: brightness(0.68) saturate(0.85);
+}
+[data-theme="dark"] .nav-btn {
+    filter: brightness(0.72) saturate(0.9);
+}
+[data-theme="dark"] .nav-btn span {
+    color: #fff;
+}
+
+/* 夜间模式：首页布局镜像（图片移到右侧，与白天相反） */
+[data-theme="dark"] .main-wrap {
+    flex-direction: row-reverse;
+}
+[data-theme="dark"] .profile-side {
+    background: url('../image/index/index_night.png') right 20px bottom 0px / contain no-repeat;
+    width: 500px;
+}
+
+/* 夜间首页色条：飞入方向改为从下到上（飞出保持原样） */
+@keyframes arrowRise {
+    0% {
+        opacity: 0;
+        transform: translateY(110vh) scaleY(0.3);
+    }
+    60% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scaleY(1);
+    }
+}
+[data-theme="dark"] .arrow-block.vertical.home-bar.stay {
+    animation: arrowRise 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
 /* ========== Reset & Base ========== */
 *,
 *::before,

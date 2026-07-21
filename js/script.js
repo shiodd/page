@@ -95,7 +95,8 @@ function showArrowBlock(color, type, leftPos) {
         document.querySelectorAll('.arrow-block').forEach(el => el.remove());
 
         const block = document.createElement('div');
-        block.className = 'arrow-block stay ' + (type || 'vertical');
+        const isHomeBar = leftPos === '420px';
+        block.className = 'arrow-block stay ' + (type || 'vertical') + (isHomeBar ? ' home-bar' : '');
         block.style.setProperty('--block-color', color);
         block.style.background = `linear-gradient(${type === 'horizontal' ? '90deg' : '180deg'}, ${color}, ${color}dd)`;
 
@@ -109,7 +110,12 @@ function showArrowBlock(color, type, leftPos) {
         } else {
             block.style.width = '44px';
             block.style.height = '100vh';
-            block.style.left = leftPos || '420px';
+            let barLeft = leftPos || '420px';
+            // 夜间模式：首页色条镜像到右侧，与图片位置相反
+            if (document.documentElement.dataset.theme === 'dark' && barLeft === '420px') {
+                barLeft = 'calc(100vw - 500px)';
+            }
+            block.style.left = barLeft;
             block.style.top = '0';
             block.style.bottom = 'auto';
         }
@@ -221,6 +227,11 @@ function initNav() {
                 playSfx(sfxClick);
                 const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
                 applyTheme(next);
+                // 首页：切换主题后刷新色条位置（夜间模式镜像到右侧）
+                const cfg = getCurrentPage();
+                if (cfg && cfg.left === '420px') {
+                    showArrowBlock(cfg.color, cfg.type, cfg.left);
+                }
             });
         }
     });
