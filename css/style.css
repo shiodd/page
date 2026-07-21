@@ -56,6 +56,12 @@
     width: 500px;
     position: relative;
     z-index: 60;
+    /* 夜间压暗图片，融入深色背景 */
+    filter: brightness(0.68) saturate(0.9);
+}
+/* 夜间模式：各子页图片（名片/头像/相册）统一压暗 */
+[data-theme="dark"] img {
+    filter: brightness(0.7) saturate(0.9);
 }
 
 /* 夜间模式：色条飞入方向反转为从下到上（飞出保持原样） */
