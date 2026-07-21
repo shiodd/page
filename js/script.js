@@ -111,7 +111,7 @@ function showArrowBlock(color, type, leftPos) {
             block.style.width = '44px';
             block.style.height = '100vh';
             let barLeft = leftPos || '420px';
-            // 夜间模式：首页色条镜像到右侧，与图片位置相反
+            
             if (document.documentElement.dataset.theme === 'dark' && barLeft === '420px') {
                 barLeft = 'calc(100vw - 500px)';
             }
@@ -232,6 +232,10 @@ function initNav() {
                 if (cfg && cfg.left === '420px') {
                     showArrowBlock(cfg.color, cfg.type, cfg.left);
                 }
+                // 切换主题：整页淡入（字与图片）
+                document.body.classList.remove('theme-switch');
+                void document.body.offsetWidth;
+                document.body.classList.add('theme-switch');
             });
         }
     });

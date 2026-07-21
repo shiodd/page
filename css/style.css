@@ -48,10 +48,14 @@
 /* 夜间模式：首页布局镜像（图片移到右侧，与白天相反） */
 [data-theme="dark"] .main-wrap {
     flex-direction: row-reverse;
+    position: relative;
+    z-index: 60;
 }
 [data-theme="dark"] .profile-side {
-    background: url('../image/index/index_night.png') right 20px bottom 0px / contain no-repeat;
+    background: url('../image/index/index_night.png') right 28px bottom 0px / contain no-repeat;
     width: 500px;
+    position: relative;
+    z-index: 60;
 }
 
 /* 夜间首页色条：飞入方向改为从下到上（飞出保持原样） */
@@ -70,6 +74,11 @@
 }
 [data-theme="dark"] .arrow-block.vertical.home-bar.stay {
     animation: arrowRise 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* 切换主题时首页字与图片淡入 */
+body.theme-switch .main-wrap {
+    animation: fadeIn 2.2s ease;
 }
 
 /* ========== Reset & Base ========== */
