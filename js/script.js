@@ -12,6 +12,17 @@ const NAV_ITEMS = [
 
 const NAV_COLORS = ['#c59fda', '#006AB6', '#D162CB', '#ffbad6', '#F3983B'];
 
+// ========== 音效 ==========
+// 根据当前所在目录解析音频相对路径（与 resolveHref 逻辑一致）
+const SFX_BASE = /\/html\//.test(window.location.pathname) ? '../sound/sfx/' : 'sound/sfx/';
+const sfxClick = new Audio(SFX_BASE + 'click.mp3');
+const sfxSelect = new Audio(SFX_BASE + 'select.mp3');
+
+function playSfx(audio) {
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+}
+
 // 各页面对应的色条配置
 const pageConfig = {
     'index.html':        { color: '#c59fda', type: 'vertical',   left: '420px' },
@@ -149,10 +160,18 @@ function initNav() {
     toggle.addEventListener('click', () => {
         const isOpen = dropdown.classList.toggle('open');
         toggle.classList.toggle('active', isOpen);
+        // 点击汉堡按钮：播放 click 音
+        playSfx(sfxClick);
     });
 
     document.querySelectorAll('.nav-dropdown .nav-btn').forEach(btn => {
+        // 鼠标移到子按钮上播放 select 音
+        btn.addEventListener('mouseenter', () => playSfx(sfxSelect));
+
         btn.addEventListener('click', function () {
+            // 点击子按钮：播放 click 音
+            playSfx(sfxClick);
+
             const color = this.style.getPropertyValue('--btn-color').trim();
             const target = this.dataset.target;
             const href = this.dataset.href;

@@ -50,8 +50,13 @@ body {
 }
 
 .nav-toggle:hover {
-    background: #fff;
+    background: #fff !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* 悬停时覆盖 JS 注入的彩色背景与白色色条，变回白色底 + 深色条 */
+.nav-toggle:hover span {
+    background: #333 !important;
 }
 
 .nav-toggle span {
