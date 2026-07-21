@@ -85,10 +85,14 @@ function getCurrentPage() {
 }
 
 function showArrowBlock(color, type, leftPos) {
-    // 旧色块先飞走（用于同页刷新色条）
+    // 旧色块先沿各自进入方向飞走（用于同页刷新色条）
     document.querySelectorAll('.arrow-block').forEach(el => {
         el.classList.remove('stay');
         el.classList.add('fly-out');
+        const dir = el.dataset.entry || 'down';
+        el.classList.add('fly-out-' + dir);
+        // 锁定原模式外观，避免被当前主题滤镜染色
+        el.style.filter = el.dataset.dim === '1' ? 'brightness(0.62) saturate(0.85)' : 'none';
     });
 
     setTimeout(() => {
@@ -97,6 +101,13 @@ function showArrowBlock(color, type, leftPos) {
         const block = document.createElement('div');
         const isHomeBar = leftPos === '420px';
         block.className = 'arrow-block stay ' + (type || 'vertical') + (isHomeBar ? ' home-bar' : '');
+        // 记录进入方向，供切主题/刷新时沿同方向飞出（不退回）
+        const isDark = document.documentElement.dataset.theme === 'dark';
+        block.dataset.entry = (type === 'horizontal')
+            ? (isDark ? 'right' : 'left')
+            : (isDark ? 'up' : 'down');
+        // 记录是否暗色，飞出时锁定原外观，不被当前主题滤镜染色
+        block.dataset.dim = isDark ? '1' : '0';
         block.style.setProperty('--block-color', color);
         block.style.background = `linear-gradient(${type === 'horizontal' ? '90deg' : '180deg'}, ${color}, ${color}dd)`;
 
@@ -135,6 +146,10 @@ function flyOutCurrentBlock() {
     document.querySelectorAll('.arrow-block').forEach(el => {
         el.classList.remove('stay');
         el.classList.add('fly-out');
+        const dir = el.dataset.entry || 'down';
+        el.classList.add('fly-out-' + dir);
+        // 锁定原模式外观，避免被当前主题滤镜染色
+        el.style.filter = el.dataset.dim === '1' ? 'brightness(0.62) saturate(0.85)' : 'none';
     });
     const toggle = document.getElementById('navToggle');
     if (toggle) {
@@ -176,6 +191,15 @@ function initNav() {
         toggle.classList.toggle('active', isOpen);
         // 点击汉堡按钮：播放 click 音
         playSfx(sfxClick);
+    });
+
+    // 点击汉堡/下拉区域以外时收回菜单
+    document.addEventListener('click', (e) => {
+        const nav = document.getElementById('topNav');
+        if (dropdown.classList.contains('open') && nav && !nav.contains(e.target)) {
+            dropdown.classList.remove('open');
+            toggle.classList.remove('active');
+        }
     });
 
     document.querySelectorAll('.nav-dropdown .nav-btn').forEach(btn => {
@@ -227,9 +251,9 @@ function initNav() {
                 playSfx(sfxClick);
                 const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
                 applyTheme(next);
-                // 首页：切换主题后刷新色条位置（夜间模式镜像到右侧）
+                // 切换主题后刷新当前页色条，使其反向飞入（夜间模式镜像到右侧）
                 const cfg = getCurrentPage();
-                if (cfg && cfg.left === '420px') {
+                if (cfg) {
                     showArrowBlock(cfg.color, cfg.type, cfg.left);
                 }
                 // 切换主题：整页淡入（字与图片）

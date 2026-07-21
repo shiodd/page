@@ -139,6 +139,21 @@
                 padding: 1.5rem 1.25rem;
             }
         }
+        /* 夜间模式：跟随主题，不再白色刺眼 */
+        [data-theme="dark"] .record-item {
+            background: rgba(40, 42, 60, 0.9);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+        }
+        [data-theme="dark"] .record-wrap h2,
+        [data-theme="dark"] .record-item .title {
+            color: #f0f0f7;
+        }
+        [data-theme="dark"] .record-item .date {
+            color: #9aa0b4;
+        }
+        [data-theme="dark"] .record-item .text {
+            color: #c2c7d6;
+        }
     </style>
 </head>
 <body>

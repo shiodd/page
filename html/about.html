@@ -89,6 +89,20 @@
         .about-card.enlarged img {
             transform: scale(1.4);
         }
+
+        /* 夜间模式：跟随主题，不再白色刺眼 */
+        [data-theme="dark"] .about-right {
+            background: rgba(30, 32, 48, 0.5);
+        }
+        [data-theme="dark"] .about-center h2 {
+            color: #f0f0f7;
+        }
+        [data-theme="dark"] .about-center p {
+            color: #c2c7d6;
+        }
+        [data-theme="dark"] .about-center a[style*="color:#555"] {
+            color: #c2c7d6 !important;
+        }
     </style>
 </head>
 <body>

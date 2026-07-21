@@ -58,7 +58,7 @@
     z-index: 60;
 }
 
-/* 夜间首页色条：飞入方向改为从下到上（飞出保持原样） */
+/* 夜间模式：色条飞入方向反转为从下到上（飞出保持原样） */
 @keyframes arrowRise {
     0% {
         opacity: 0;
@@ -72,13 +72,32 @@
         transform: translateY(0) scaleY(1);
     }
 }
-[data-theme="dark"] .arrow-block.vertical.home-bar.stay {
+[data-theme="dark"] .arrow-block.vertical.stay {
     animation: arrowRise 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* 切换主题时首页字与图片淡入 */
-body.theme-switch .main-wrap {
-    animation: fadeIn 2.2s ease;
+/* 夜间模式：横向色条飞入方向反转为从左侧进入 */
+@keyframes barSlideInReverse {
+    0% {
+        opacity: 0;
+        transform: translateX(-110vw) scaleX(0.3);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0) scaleX(1);
+    }
+}
+[data-theme="dark"] .arrow-block.horizontal.stay {
+    animation: barSlideInReverse 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* 切换主题时各页面内容与首页一致淡入 */
+body.theme-switch .main-wrap,
+body.theme-switch .about-page,
+body.theme-switch .record-page,
+body.theme-switch .card-page,
+body.theme-switch .friends-page {
+    animation: fadeIn 2.2s ease forwards;
 }
 
 /* ========== Reset & Base ========== */
@@ -313,13 +332,18 @@ body {
     animation: barSlideIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* 飞出：由多到少（scale 收缩）+ 飞出屏幕，与进入对称反向 */
-.arrow-block.vertical.fly-out {
+/* 飞出：沿各自进入方向继续飞出（不退回），由多到少（scale 收缩） */
+.arrow-block.fly-out-down {
     animation: flyOutDown 0.4s ease-in forwards;
 }
-
-.arrow-block.horizontal.fly-out {
+.arrow-block.fly-out-up {
+    animation: flyOutUp 0.4s ease-in forwards;
+}
+.arrow-block.fly-out-left {
     animation: flyOutLeft 0.4s ease-in forwards;
+}
+.arrow-block.fly-out-right {
+    animation: flyOutRight 0.4s ease-in forwards;
 }
 
 @keyframes arrowDrop {
@@ -369,6 +393,28 @@ body {
     100% {
         opacity: 0;
         transform: translateX(-110vw) scaleX(0);
+    }
+}
+
+@keyframes flyOutUp {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scaleY(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-110vh) scaleY(0);
+    }
+}
+
+@keyframes flyOutRight {
+    0% {
+        opacity: 1;
+        transform: translateX(0) scaleX(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(110vw) scaleX(0);
     }
 }
 
