@@ -1,6 +1,6 @@
 /* ========== Theme Variables ========== */
 :root {
-    --bg-grad: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    --bg-grad: linear-gradient(135deg, #d3dae7 0%, #a8b8d2 100%);
     --text: #333;
     --text-strong: #1a1a2e;
     --text-soft: #555;
@@ -118,7 +118,8 @@ body.theme-switch .friends-page {
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
         "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
-    background: var(--bg-grad);
+    /* 固定白天渐变：夜间黑色由下方叠加层（opacity 过渡）提供，从而实现平滑渐变黑；底色调柔和不刺眼 */
+    background: linear-gradient(135deg, #d3dae7 0%, #a8b8d2 100%);
     display: flex;
     padding: 0;
     margin: 0;
@@ -128,6 +129,22 @@ body {
     overflow-y: hidden;
     height: 100vh;
     transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* 夜间模式背景：用固定暗色叠加层 + opacity 过渡实现平滑渐变黑
+   （渐变无法直接过渡，故用叠加层的方式） */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    opacity: 0;
+    transition: opacity 1.5s ease;
+    z-index: -1;
+    pointer-events: none;
+}
+[data-theme="dark"] body::before {
+    opacity: 1;
 }
 
 /* ========== Top Nav ========== */
