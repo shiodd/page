@@ -47,7 +47,7 @@ function download(url, dest) {
 }
 
 (async () => {
-  const imgDir = path.join(process.cwd(), 'image', 'meishi');
+  const imgDir = path.join(process.cwd(), 'image', 'friends');
   fs.mkdirSync(imgDir, { recursive: true });
 
   const frontFile = path.join(imgDir, `friend-${issueNumber}-front.png`);
@@ -55,8 +55,8 @@ function download(url, dest) {
   await download(front, frontFile);
   await download(back, backFile);
 
-  const frontRel = `../image/meishi/friend-${issueNumber}-front.png`;
-  const backRel = `../image/meishi/friend-${issueNumber}-back.png`;
+  const frontRel = `../image/friends/friend-${issueNumber}-front.png`;
+  const backRel = `../image/friends/friend-${issueNumber}-back.png`;
 
   const dataFile = path.join(process.cwd(), 'html', 'data', 'friends.js');
   let content = fs.readFileSync(dataFile, 'utf8');
