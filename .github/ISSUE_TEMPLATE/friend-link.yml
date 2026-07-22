@@ -1,6 +1,6 @@
 name: 申请友链
 description: 提交你的名片加入友链墙
-title: 标题
+title: "[友链申请]"
 labels: ["friend-link"]
 body:
   - type: markdown
@@ -9,7 +9,7 @@ body:
   - type: input
     id: name
     attributes:
-      label: 名称
+      label: 名字
       description: 显示在名片下方的名字
     validations:
       required: true
@@ -17,14 +17,14 @@ body:
     id: front
     attributes:
       label: 名片正面图片链接
-      description: 可直接访问的图片 URL（png / jpg）
+      description: 可直接访问的图片 URL（png / jpg），建议使用标准名片格式
     validations:
       required: true
   - type: input
     id: back
     attributes:
       label: 名片反面图片链接
-      description: 可直接访问的图片 URL（png / jpg）
+      description: 可直接访问的图片 URL（png / jpg），建议使用标准名片格式
     validations:
       required: true
   - type: input

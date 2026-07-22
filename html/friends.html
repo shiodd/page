@@ -15,7 +15,14 @@
         })();
     </script>
     <style>
-        /* 与 记录/关于 页面一致：上对齐、居中包裹容器、统一标题与暗色风格 */
+        :root {
+            --accent-base: #F3983B;
+            --accent: var(--accent-base);
+        }
+        [data-theme="dark"] {
+            --accent: color-mix(in srgb, var(--accent-base) 70%, #000);
+        }
+
         .friends-page {
             flex: 1;
             min-height: 100vh;
@@ -27,27 +34,137 @@
         }
 
         .friends-wrap {
-            max-width: 900px;
+            max-width: 1100px;
             width: 100%;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 300px;
+            gap: 2rem;
+            align-items: start;
         }
 
-        .friends-wrap h2 {
+        .friends-main {
+            min-width: 0;
+        }
+
+        .friends-head {
+            display: flex;
+            align-items: baseline;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .friends-head h2 {
             font-size: 1.5rem;
             font-weight: 600;
             color: #1a1a2e;
-            margin-bottom: 1.5rem;
+            margin: 0;
+        }
+        .friends-head .apply-link {
+            position: relative;
+            font-size: 0.9rem;
+            color: var(--accent);
+            text-decoration: none;
+            cursor: pointer;
+            user-select: none;
+        }
+        /* 下划线动画：默认从左侧收起，hover 时向左生长出现 */
+        .friends-head .apply-link::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -3px;
+            width: 100%;
+            height: 2px;
+            background: var(--accent);
+            transform: scaleX(0);
+            transform-origin: left center;
+            transition: transform 0.25s ease;
+        }
+        .friends-head .apply-link:hover::after,
+        .friends-head .apply-link.active::after {
+            transform: scaleX(1);
+        }
+
+        /* 右侧「如何申请友链」教程面板：随页面正常滚动（可滚出视图），默认隐藏，点击后引导显示 */
+        .friends-aside {
+            width: 300px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+        }
+        .friends-aside.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .friends-aside h3 {
+            margin: 0 0 1rem;
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+        .friends-aside ol {
+            margin: 0 0 1rem;
+            padding-left: 1.25rem;
+            line-height: 1.7;
+            color: #1a1a2e;
+        }
+        .friends-aside code {
+            background: rgba(0, 0, 0, 0.08);
+            padding: 0.1em 0.4em;
+            font-size: 0.9em;
+        }
+        .friends-aside p {
+            margin: 0;
+            line-height: 1.6;
+            color: #1a1a2e;
+        }
+        /* 教程内链接：文字用主题色，下划线 hover 从左长出；inline-block 加宽内边距，使下划线覆盖文字区、不再显窄 */
+        .friends-aside a {
+            color: var(--accent);
+            text-decoration: none;
+            position: relative;
+            display: inline-block;
+            padding: 0 0.45rem;
+        }
+        .friends-aside a::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -2px;
+            height: 2px;
+            width: 0;
+            background: var(--accent);
+            transition: width 0.25s ease;
+        }
+        .friends-aside a:hover::after {
+            width: 100%;
+        }
+        /* 点击后从标题链接伸出的主题色引导细线，延伸到右侧教程 */
+        .apply-line {
+            position: fixed;
+            height: 2px;
+            background: var(--accent);
+            transform-origin: left center;
+            transform: scaleX(0);
+            transition: transform 0.45s ease;
+            z-index: 1001;
+            pointer-events: none;
+        }
+        .apply-line.show {
+            transform: scaleX(1);
         }
 
         .friends-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: 1.5rem;
             width: 100%;
         }
 
         .friend-card {
             background: rgba(255, 255, 255, 0.9);
-            padding: 1.25rem;
             text-align: center;
             cursor: pointer;
             user-select: none;
@@ -73,23 +190,40 @@
             width: 100%;
             height: auto;
             display: block;
-            margin-bottom: 0.75rem;
         }
 
+        /* 名称放在图片下方，与卡片背景一致；inline-block 使文字居中 */
         .friend-card .name {
+            display: inline-block;
+            padding: 0.65rem 0.5rem;
             font-size: 0.95rem;
             font-weight: 600;
             color: #1a1a2e;
         }
 
-        /* 名称超链接（可选）：继承文字色，加下划线 */
+        /* 名称超链接（可选）：仅带链接的名字才显示与教程一致的主题色生长下划线 */
         .friend-card .name a {
             color: inherit;
-            text-decoration: underline;
-            text-underline-offset: 3px;
+            text-decoration: none;
         }
-        .friend-card .name a:hover {
-            opacity: 0.75;
+        /* 下划线加在名字块上，仅含链接的名字显示；宽度覆盖文字区，避免显得过窄 */
+        .friend-card .name:has(a) {
+            position: relative;
+        }
+        .friend-card .name:has(a)::after {
+            content: "";
+            position: absolute;
+            left: 0.5rem;
+            right: 0.5rem;
+            bottom: 0.45rem;
+            height: 2px;
+            background: var(--accent);
+            transform: scaleX(0);
+            transform-origin: left center;
+            transition: transform 0.25s ease;
+        }
+        .friend-card .name:has(a):hover::after {
+            transform: scaleX(1);
         }
 
         /* 点击放大遮罩（与 记录页 一致：无圆角、scale 缩放、底部控制条） */
@@ -104,7 +238,7 @@
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.25s ease;
-            z-index: 1000;
+            z-index: 1002;
             cursor: zoom-out;
         }
 
@@ -171,12 +305,18 @@
             user-select: none;
         }
 
+        @media (max-width: 760px) {
+            .friends-wrap {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 480px) {
             .friends-page {
                 padding: 2rem 1.25rem;
             }
-            .friend-card {
-                padding: 1rem;
+            .friends-grid {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -185,9 +325,21 @@
             background: rgba(40, 42, 60, 0.9);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
         }
-        [data-theme="dark"] .friends-wrap h2,
+        [data-theme="dark"] .friends-head h2,
         [data-theme="dark"] .friend-card .name {
             color: #f0f0f7;
+        }
+        [data-theme="dark"] .friends-aside {
+            background: rgba(40, 42, 60, 0.9);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+        }
+        [data-theme="dark"] .friends-aside h3,
+        [data-theme="dark"] .friends-aside ol,
+        [data-theme="dark"] .friends-aside p {
+            color: #f0f0f7;
+        }
+        [data-theme="dark"] .friends-aside code {
+            background: rgba(255, 255, 255, 0.12);
         }
     </style>
 </head>
@@ -196,8 +348,28 @@
 
     <div class="friends-page">
         <div class="friends-wrap">
-            <h2>友链</h2>
-            <div class="friends-grid" id="friendsGrid"></div>
+            <div class="friends-main">
+                <div class="friends-head">
+                    <h2>友链</h2>
+                    <span class="apply-link" id="applyLink">如何申请友链</span>
+                </div>
+                <div class="friends-grid" id="friendsGrid"></div>
+            </div>
+
+            <!-- 点击后伸出的引导细线（固定定位，始终连接文字与右侧教程面板） -->
+            <div class="apply-line" id="applyLine"></div>
+
+            <!-- 右侧「如何申请友链」教程（默认隐藏，点击后细线引导显示；随页面正常滚动，可滚出视图） -->
+            <aside class="friends-aside" id="applyAside">
+                <h3>如何申请友链</h3>
+                <ol>
+                    <li><a href="https://github.com/shiodd/page/issues" target="_blank" rel="noopener noreferrer">提交 Issue</a>，选择「申请友链」模板。</li>
+                    <li>填写：名称、名片正面图片链接、名片反面图片链接（图片需公网可直接访问，支持 png / jpg）。</li>
+                    <li>可选填写「个人主页链接」，审核通过后名字会变为可点击的链接。</li>
+                    <li>仓库管理者在 Issue 下评论 <code>/approve</code> 完成审核，系统会自动下载名片、写入友链墙并部署。</li>
+                </ol>
+                <p>部署完成后，即可在友链墙看到你的名片。</p>
+            </aside>
         </div>
     </div>
 
@@ -218,6 +390,12 @@
     <script src="data/friends.js"></script>
 
     <script>
+
+        try {
+            const _themeColor = (typeof getCurrentPage === 'function' && getCurrentPage().color) || '#F3983B';
+            document.documentElement.style.setProperty('--accent-base', _themeColor);
+        } catch (e) {}
+
         // 数据来自 data/friends.js，这里只负责渲染
         const grid = document.getElementById('friendsGrid');
 
@@ -299,11 +477,85 @@
             lightboxImg.src = showingBack ? currentFriend.back : currentFriend.front;
             flipBtn.textContent = showingBack ? '正面' : '反面';
         });
-        // Esc 关闭
+        // ========== 如何申请友链：默认隐藏，点击后细线引导并显示右侧教程 ==========
+        const applyLink = document.getElementById('applyLink');
+        const applyAside = document.getElementById('applyAside');
+        const applyLine = document.getElementById('applyLine');
+        const friendsPage = document.querySelector('.friends-page');
+        let applyOpen = false;
+
+        // 依据当前链接/面板位置实时计算细线几何，使其始终连接两者
+        function positionApplyLine() {
+            const lr = applyLink.getBoundingClientRect();
+            const ar = applyAside.getBoundingClientRect();
+            const startX = lr.right;
+            const startY = lr.bottom + 1; // 从下划线所在位置延伸（下划线在文字底部下方约 1px）
+            const endX = ar.left;
+            const len = Math.max(60, endX - startX);
+            applyLine.style.left = startX + 'px';
+            applyLine.style.top = startY + 'px';
+            applyLine.style.width = len + 'px';
+        }
+
+        // 视口变化（缩放/滚动）时重新锚定细线，避免错位
+        function reflowApplyLine() {
+            if (!applyOpen) return;
+            if (window.innerWidth <= 760) {
+                applyLine.classList.remove('show');
+                return;
+            }
+            applyLine.classList.add('show');
+            positionApplyLine();
+        }
+
+        // 面板位于文档流中，随页面滚动（可滚出视图），无需固定定位；
+        // 引导细线通过 getBoundingClientRect 实时连接文字与面板，滚动时由 reflowApplyLine 重锚。
+
+        function onViewportChange() {
+            reflowApplyLine();
+        }
+
+        function openApply() {
+            applyOpen = true;
+            applyLink.classList.add('active');
+            // 窄屏两栏已堆叠，直接显示，不画横向细线
+            if (window.innerWidth <= 760) {
+                applyAside.classList.add('show');
+                applyLine.classList.remove('show');
+                return;
+            }
+            applyLine.classList.remove('show');
+            void applyLine.offsetWidth; // 强制重排，确保细线从 0 重新生长
+            positionApplyLine();
+            applyLine.classList.add('show');
+            // 细线到位后显示教程；下划线与细线在展开期间保持显示，关闭时才收回
+            setTimeout(() => applyAside.classList.add('show'), 470);
+        }
+        function closeApply() {
+            applyOpen = false;
+            applyAside.classList.remove('show');
+            applyLine.classList.remove('show');
+            applyLink.classList.remove('active');
+        }
+
+        // 缩放时重锚细线；滚动时（面板随页面滚动）细线实时重锚，始终连接文字与面板
+        window.addEventListener('resize', onViewportChange);
+        if (friendsPage) friendsPage.addEventListener('scroll', reflowApplyLine);
+
+        applyLink.addEventListener('click', () => {
+            if (applyAside.classList.contains('show')) {
+                closeApply();
+            } else {
+                openApply();
+            }
+        });
+
+        // Esc 关闭放大层 / 教程
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 lightbox.classList.remove('open');
                 resetZoom();
+                closeApply();
             }
         });
     </script>
