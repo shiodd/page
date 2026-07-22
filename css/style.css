@@ -549,9 +549,26 @@ body::before {
 }
 
 .home-sub {
+    display: inline-block;
     font-size: 1rem;
     color: var(--text-muted);
     margin-bottom: 1.5rem;
+    transition: color 0.6s ease;
+}
+
+/* 日语标语：只有「輝き」两个字参与渐变。悬停整句副标题时，
+   仅该 span 保持同一种颜色并平滑过渡到下一个主题色（循环）。
+   动画的 keyframes 由 JS 用 NAV_COLORS 动态生成，不写死颜色。 */
+.gradient-text {
+    transition: color 0.6s ease;
+}
+.home-sub:hover .gradient-text {
+    animation: themeColorShift 6s linear infinite;
+}
+
+/* 夜间模式：与导航主题色（.arrow-block）保持一致的方式变暗，避免亮色刺眼（不写死颜色） */
+[data-theme="dark"] .gradient-text {
+    filter: brightness(0.62) saturate(0.85);
 }
 
 /* ========== About Screen ========== */

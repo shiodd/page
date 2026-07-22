@@ -24,7 +24,7 @@
         <div class="content-side">
             <div class="home-center">
                 <h1 class="home-name">Shion</h1>
-                <p class="home-sub">輝きの向こう側へ！</p>
+                <p class="home-sub"><span class="gradient-text">輝き</span>の向こう側へ！</p>
 
             </div>
         </div>
@@ -34,5 +34,33 @@
     </footer>
 
     <script src="js/script.js"></script>
+    <script>
+        // 用所有主题色（NAV_COLORS）生成「整段文字同一种颜色 → 平滑过渡到下一个颜色」的动画，
+        // 动态写入 keyframes 并注入样式，避免写死颜色。
+        (function () {
+            var el = document.querySelector('.gradient-text');
+            if (!el || typeof NAV_COLORS === 'undefined' || !NAV_COLORS.length) return;
+
+            // 默认（静止态）使用首页主题色（NAV_COLORS[0]），让「輝き」默认就是首页色，不写死
+            var homeColor = NAV_COLORS[0];
+            el.style.color = homeColor;
+
+            // 动画首尾都用首页主题色，悬停/离开时从首页色平滑过渡到其它主题色，无跳变
+            var seq = NAV_COLORS.slice().concat([homeColor]);
+
+            var n = seq.length - 1;             // 颜色段数
+            var step = 100 / n;                 // 每段占的时间百分比
+            var css = '@keyframes themeColorShift {\n';
+            seq.forEach(function (c, i) {
+                var pct = (i * step).toFixed(2);
+                css += '  ' + pct + '% { color: ' + c + '; -webkit-text-fill-color: ' + c + '; }\n';
+            });
+            css += '}\n';
+
+            var style = document.createElement('style');
+            style.textContent = css;
+            document.head.appendChild(style);
+        })();
+    </script>
 </body>
 </html>
