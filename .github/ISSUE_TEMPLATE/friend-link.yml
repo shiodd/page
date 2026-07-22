@@ -1,6 +1,6 @@
 name: 申请友链
 description: 提交你的名片加入友链墙
-title: ""
+title: "标题"
 labels: ["friend-link"]
 body:
   - type: markdown
