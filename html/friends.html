@@ -64,6 +64,11 @@
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
         }
 
+        @keyframes fadeInUp {
+            0%   { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
         .friend-card img {
             width: 100%;
             height: auto;
@@ -77,44 +82,93 @@
             color: #1a1a2e;
         }
 
-        .card-flip {
-            perspective: 1000px;
-            cursor: pointer;
+        /* 名称超链接（可选）：继承文字色，加下划线 */
+        .friend-card .name a {
+            color: inherit;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .friend-card .name a:hover {
+            opacity: 0.75;
+        }
+
+        /* 点击放大遮罩（与 记录页 一致：无圆角、scale 缩放、底部控制条） */
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.82);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s ease;
+            z-index: 1000;
+            cursor: zoom-out;
+        }
+
+        .lightbox.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .lightbox img {
+            max-width: 55vw;
+            max-height: 55vh;
+            width: auto;
+            height: auto;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+            cursor: zoom-out;
+            transition: transform 0.15s ease;
             user-select: none;
             -webkit-user-select: none;
+            -webkit-user-drag: none;
         }
 
-        .card-flip-inner {
-            position: relative;
-            transition: transform 0.6s ease;
-            transform-style: preserve-3d;
-        }
-
-        .card-flip.flipped-right .card-flip-inner {
-            transform: rotateY(180deg);
-        }
-
-        .card-flip.flipped-left .card-flip-inner {
-            transform: rotateY(-180deg);
-        }
-
-        .card-face {
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-        }
-
-        .card-face img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-
-        .card-back {
+        /* 放大层底部缩放控制条 */
+        .lightbox-bar {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            transform: rotateY(180deg);
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.4rem 0.8rem;
+            background: rgba(20, 22, 34, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 0;
+            z-index: 2;
+        }
+        .lightbox-bar button {
+            width: 2rem;
+            height: 2rem;
+            border: none;
+            border-radius: 0;
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            font-size: 1.1rem;
+            line-height: 1;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+        .lightbox-bar button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .lightbox-bar #zoomReset,
+        .lightbox-bar #flipSide {
+            width: auto;
+            border-radius: 0;
+            padding: 0 0.9rem;
+            font-size: 0.85rem;
+        }
+        .lightbox-bar #zoomVal {
+            min-width: 3rem;
+            text-align: center;
+            color: #fff;
+            font-size: 0.85rem;
+            user-select: none;
         }
 
         @media (max-width: 480px) {
@@ -147,6 +201,18 @@
         </div>
     </div>
 
+    <!-- 点击放大查看名片（逻辑/样式与 记录页 一致） -->
+    <div class="lightbox" id="lightbox">
+        <img alt="放大图" />
+        <div class="lightbox-bar">
+            <button type="button" id="zoomOut" title="缩小">−</button>
+            <span id="zoomVal">100%</span>
+            <button type="button" id="zoomIn" title="放大">＋</button>
+            <button type="button" id="zoomReset" title="还原">还原</button>
+            <button type="button" id="flipSide" title="正反面">反面</button>
+        </div>
+    </div>
+
     <script src="../js/script.js"></script>
     <!-- 友链数据在 HTML 外维护：data/friends.js（定义全局 friendsData） -->
     <script src="data/friends.js"></script>
@@ -159,22 +225,87 @@
             const card = document.createElement('div');
             card.className = 'friend-card';
             card.style.animationDelay = (index * 0.08) + 's'; // 逐张错落浮现
+
+            // 名称可选超链接：仅 http/https 才视为合法链接
+            const url = (friend.url && /^https?:\/\//i.test(friend.url)) ? friend.url : '';
+            const nameHtml = url
+                ? `<a href="${url}" target="_blank" rel="noopener noreferrer">${friend.name}</a>`
+                : friend.name;
+
             card.innerHTML = `
-                <div class="card-flip" data-index="${index}">
-                    <div class="card-flip-inner">
-                        <div class="card-face card-front">
-                            <img src="${friend.front}" alt="${friend.name}名片正面" />
-                        </div>
-                        <div class="card-face card-back">
-                            <img src="${friend.back}" alt="${friend.name}名片反面" />
-                        </div>
-                    </div>
-                </div>
-                <div class="name">${friend.name}</div>
+                <img src="${friend.front}" alt="${friend.name}名片正面" />
+                <div class="name">${nameHtml}</div>
             `;
+            // 点名称链接只跳转，不触发放大
+            card.addEventListener('click', (e) => {
+                if (e.target.closest('a')) return;
+                openLightbox(friend);
+            });
             grid.appendChild(card);
         });
-        // 翻转逻辑由 ../js/script.js 的 bindCardFlip() 统一处理
+
+        // ========== 点击放大（与 记录页 一致：scale 缩放、点遮罩/Esc 关闭） ==========
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = lightbox.querySelector('img');
+        const zoomInBtn = document.getElementById('zoomIn');
+        const zoomOutBtn = document.getElementById('zoomOut');
+        const zoomResetBtn = document.getElementById('zoomReset');
+        const zoomVal = document.getElementById('zoomVal');
+        const flipBtn = document.getElementById('flipSide');
+        let zoom = 1;
+        const ZOOM_MIN = 0.4, ZOOM_MAX = 3, ZOOM_STEP = 0.2;
+        let currentFriend = null;
+        let showingBack = false;
+
+        function applyZoom() {
+            lightboxImg.style.transform = 'scale(' + zoom + ')';
+            zoomVal.textContent = Math.round(zoom * 100) + '%';
+        }
+        function resetZoom() {
+            zoom = 1;
+            applyZoom();
+        }
+        function openLightbox(friend) {
+            currentFriend = friend;
+            showingBack = false;
+            lightboxImg.src = friend.front;
+            flipBtn.textContent = '反面';
+            lightbox.classList.add('open');
+        }
+
+        // 点遮罩背景或大图本身都关闭
+        lightbox.addEventListener('click', () => {
+            lightbox.classList.remove('open');
+            resetZoom();
+        });
+        zoomInBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            zoom = Math.min(zoom + ZOOM_STEP, ZOOM_MAX);
+            applyZoom();
+        });
+        zoomOutBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            zoom = Math.max(zoom - ZOOM_STEP, ZOOM_MIN);
+            applyZoom();
+        });
+        zoomResetBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            resetZoom();
+        });
+        // 正反面切换
+        flipBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showingBack = !showingBack;
+            lightboxImg.src = showingBack ? currentFriend.back : currentFriend.front;
+            flipBtn.textContent = showingBack ? '正面' : '反面';
+        });
+        // Esc 关闭
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                lightbox.classList.remove('open');
+                resetZoom();
+            }
+        });
     </script>
 </body>
 </html>

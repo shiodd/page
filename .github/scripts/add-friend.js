@@ -1,5 +1,5 @@
 // 由 .github/workflows/friend-link.yml 的 approve job 调用：
-// 解析 Issue 正文，下载名片正/反面图片到 image/meishi/，并追加到 html/data/friends.js。
+// 解析 Issue 正文，下载名片正/反面图片到 image/friends/，并追加到 html/data/friends.js。
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
@@ -17,6 +17,7 @@ function field(label) {
 const name = field('名称');
 const front = field('名片正面图片链接');
 const back = field('名片反面图片链接');
+const url = field('个人主页链接（可选）');
 
 if (!name || !front || !back) {
   console.error('缺少必要字段');
@@ -60,7 +61,8 @@ function download(url, dest) {
 
   const dataFile = path.join(process.cwd(), 'html', 'data', 'friends.js');
   let content = fs.readFileSync(dataFile, 'utf8');
-  const entry = `    { name: ${JSON.stringify(name)}, front: ${JSON.stringify(frontRel)}, back: ${JSON.stringify(backRel)} },\n    // NEW_FRIEND`;
+  const urlPart = url && /^https?:\/\//i.test(url) ? `, url: ${JSON.stringify(url)}` : '';
+  const entry = `    { name: ${JSON.stringify(name)}, front: ${JSON.stringify(frontRel)}, back: ${JSON.stringify(backRel)}${urlPart} },\n    // NEW_FRIEND`;
 
   if (content.includes('// NEW_FRIEND')) {
     content = content.replace('// NEW_FRIEND', entry);
