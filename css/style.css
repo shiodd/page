@@ -609,7 +609,6 @@ body::before {
 [data-theme="dark"] .click-bar {
     filter: brightness(0.62) saturate(0.85);
 }
-}
 
 /* ========== About Screen ========== */
 .about-screen {
