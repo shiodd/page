@@ -529,6 +529,7 @@ body::before {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    position: relative;
     background: var(--surface-soft);
     opacity: 0;
     transform: translateY(20px);
@@ -537,7 +538,11 @@ body::before {
 }
 
 .home-center {
+    position: relative;
+    z-index: 1;
     text-align: center;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .home-name {
@@ -569,6 +574,41 @@ body::before {
 /* 夜间模式：与导航主题色（.arrow-block）保持一致的方式变暗，避免亮色刺眼（不写死颜色） */
 [data-theme="dark"] .gradient-text {
     filter: brightness(0.62) saturate(0.85);
+}
+
+/* ========== 首页点击色条 ========== */
+/* 点页面任意位置，从该 x 坐标从屏幕顶部落下一条贯穿全屏高度的色条，停留后从右侧飞走 */
+.click-bar {
+    position: absolute;
+    top: 0;
+    width: 44px;
+    height: 100vh;
+    transform: translateY(-100%);
+    pointer-events: none;
+    z-index: 0;
+}
+/* 点击屏幕下半：落下后从下方飞走 */
+.click-bar.fly-down {
+    animation: clickBarDown 1.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+/* 点击屏幕上半：落下后从上方飞走 */
+.click-bar.fly-up {
+    animation: clickBarUp 1.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@keyframes clickBarDown {
+    0%   { transform: translateY(-100%); opacity: 0; }
+    18%  { transform: translateY(0);     opacity: 1; }
+    100% { transform: translateY(100%);  opacity: 1; }
+}
+@keyframes clickBarUp {
+    0%   { transform: translateY(100%);  opacity: 0; }
+    18%  { transform: translateY(0);     opacity: 1; }
+    100% { transform: translateY(-100%); opacity: 1; }
+}
+/* 夜间模式：点击色条与导航主题色一致的方式变暗（不写死颜色） */
+[data-theme="dark"] .click-bar {
+    filter: brightness(0.62) saturate(0.85);
+}
 }
 
 /* ========== About Screen ========== */

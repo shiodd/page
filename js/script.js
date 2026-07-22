@@ -288,9 +288,55 @@ window.addEventListener('load', () => {
     initNav();
     initTheme();
     bindCardFlip();
+    initClickBars();
 
     const config = getCurrentPage();
     if (config) {
         setTimeout(() => showArrowBlock(config.color, config.type, config.left), 600);
     }
 });
+
+// ========== 首页点击色条 ==========
+// 点击页面任意位置，从点击的 x 坐标落下一条贯穿全屏高度的色条，停留后从右侧飞走。
+// 颜色池 = 所有主题色（NAV_COLORS）+ 额外色，不写死在 CSS 里。
+const CLICK_BAR_COLORS = [
+    '#E60012', '#0060A8', '#B0CA00', '#D9E5E6', '#F39800', '#000000',
+    '#FC8A82', '#A4005B', '#007536', '#920783', '#FFE200', '#00A0E9', '#79C06E',
+];
+
+function initClickBars() {
+    // 仅首页（含 .home-sub）启用
+    if (!document.querySelector('.home-sub')) return;
+
+    const pool = NAV_COLORS.concat(CLICK_BAR_COLORS);
+
+    document.addEventListener('click', (e) => {
+        // 点到导航/菜单时不触发，避免与导航交互冲突
+        if (e.target.closest('.top-nav')) return;
+        // 限定在文字内容区（.content-side），图片区（.profile-side）不可点
+        if (e.target.closest('.profile-side')) return;
+        if (!e.target.closest('.content-side')) return;
+        // 原色条（.arrow-block）所在横向位置不可点
+        const ab = document.querySelector('.arrow-block');
+        if (ab) {
+            const r = ab.getBoundingClientRect();
+            if (e.clientX >= r.left && e.clientX <= r.right) return;
+        }
+
+        const color = pool[Math.floor(Math.random() * pool.length)];
+        const bar = document.createElement('div');
+        // 点击位置在屏幕上半 → 从顶部落下、从下方飞走；下半 → 从底部升起、从上方飞走
+        const isUpper = e.clientY < window.innerHeight / 2;
+        bar.className = 'click-bar ' + (isUpper ? 'fly-down' : 'fly-up');
+        bar.style.background = `linear-gradient(180deg, ${color}, ${color}cc)`;
+
+        // 色条放进内容区内部，定位相对内容区（避免被其半透明面板冲淡，又不遮挡文字）
+        const host = document.querySelector('.content-side') || document.body;
+        const rect = host.getBoundingClientRect();
+        bar.style.top = (-rect.top) + 'px';                 // 对齐到视口顶部
+        bar.style.left = (e.clientX - rect.left - 22) + 'px'; // 22 = 宽度一半，居中于点击点
+        host.appendChild(bar);
+
+        bar.addEventListener('animationend', () => bar.remove());
+    });
+}
