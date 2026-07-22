@@ -159,26 +159,11 @@
     </div>
 
     <script src="../js/script.js"></script>
+    <!-- 名片数据在 HTML 外维护：data/cards.js（定义全局 cardData） -->
+    <script src="data/cards.js"></script>
 
     <script>
-        // ===== 数据 =====
-        const cardData = [
-            {
-                date: '2026.07.21',
-                front: '../image/meishi/me/正.png',
-                back: '../image/meishi/me/反.png'
-            },
-            
-            {
-                date: '2026.07.20',
-                front: '../image/meishi/me/正.png',
-                back: '../image/meishi/me/反.png'
-            }
-
-
-        ];
-
-        // ===== 渲染 =====
+        // 数据来自 data/cards.js，这里只负责渲染
         const timeline = document.getElementById('timeline');
 
         cardData.forEach((item, index) => {

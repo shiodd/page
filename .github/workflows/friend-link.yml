@@ -1,0 +1,95 @@
+name: 友链审核
+
+on:
+  issues:
+    types: [opened]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  # 1) 提交 Issue 后：校验字段、预览、打标签，不写入仓库
+  preview:
+    if: >-
+      github.event_name == 'issues' &&
+      github.event.action == 'opened' &&
+      contains(github.event.issue.labels.*.name, 'friend-link')
+    runs-on: ubuntu-latest
+    steps:
+      - name: 校验并预览
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.issue.body || '';
+            const field = (label) => {
+              const m = body.match(new RegExp('###\\s*' + label + '\\s*\\n([\\s\\S]*?)(?=\\n###|$)'));
+              return m ? m[1].trim() : '';
+            };
+            const name = field('名称');
+            const front = field('名片正面图片链接');
+            const back = field('名片反面图片链接');
+            const issue_number = context.issue.number;
+
+            if (!name || !front || !back) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo, issue_number,
+                body: '缺少必要字段（名称 / 名片正面图片链接 / 名片反面图片链接），请补全后重新提交。'
+              });
+              return;
+            }
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner, repo: context.repo.repo, issue_number,
+              labels: ['friend-pending']
+            });
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner, repo: context.repo.repo, issue_number,
+              body: `友链预览：\n\n- 名称：${name}\n- 正面：${front}\n- 反面：${back}\n\n审核通过请评论 \`/approve\`（仅仓库所有者 / 协作者可触发）。`
+            });
+
+  # 2) 管理员评论 /approve 后：下载图片、写入 friends.js、提交并关闭 issue
+  approve:
+    if: >-
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request == null &&
+      (github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'COLLABORATOR' || github.event.comment.author_association == 'MEMBER') &&
+      startsWith(github.event.comment.body, '/approve') &&
+      contains(github.event.issue.labels.*.name, 'friend-pending')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 解析并写入友链（下载图片 + 更新 friends.js）
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: node .github/scripts/add-friend.js
+
+      - name: 提交改动
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat(friend): add #${{ github.event.issue.number }}" || echo "无改动"
+          git push
+
+      - name: 评论并关闭 issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number,
+              body: '已添加友链，部署后即可在友链墙看到。'
+            });
+            await github.rest.issues.update({
+              owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number,
+              state: 'closed'
+            });

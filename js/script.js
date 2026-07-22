@@ -7,7 +7,7 @@ const NAV_ITEMS = [
     { label: '关于',   href: 'html/about.html' },
     { label: '记录',   href: 'html/record.html' },
     { label: '名片',   href: 'html/card.html' },
-    { label: '名片墙', href: 'html/friends.html' },
+    { label: '友链', href: 'html/friends.html' },
 ];
 
 const NAV_COLORS = ['#c59fda', '#006AB6', '#D162CB', '#ffbad6', '#F3983B'];

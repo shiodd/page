@@ -1,0 +1,29 @@
+name: 申请友链
+description: 提交你的名片，加入友链墙（审核通过后自动添加）
+title: "[友链] "
+labels: ["friend-link"]
+body:
+  - type: markdown
+    attributes:
+      value: 填写以下信息申请加入友链墙，管理员审核通过后会自动添加。
+  - type: input
+    id: name
+    attributes:
+      label: 名称
+      description: 显示在名片下方的名字
+    validations:
+      required: true
+  - type: input
+    id: front
+    attributes:
+      label: 名片正面图片链接
+      description: 可直接访问的图片 URL（png / jpg）
+    validations:
+      required: true
+  - type: input
+    id: back
+    attributes:
+      label: 名片反面图片链接
+      description: 可直接访问的图片 URL（png / jpg）
+    validations:
+      required: true
