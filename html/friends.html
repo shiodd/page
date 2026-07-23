@@ -84,9 +84,9 @@
             transform: scaleX(1);
         }
 
-        /* 右侧「如何申请友链」教程面板：随页面正常滚动（可滚出视图），默认隐藏，点击后引导显示 */
+        /* 右侧「如何申请友链」教程面板 */
         .friends-aside {
-            width: 300px;
+            width: 310px;
             background: rgba(255, 255, 255, 0.9);
             padding: 1.5rem;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
@@ -194,6 +194,8 @@
         .friend-card img {
             width: 100%;
             height: auto;
+            aspect-ratio: 91 / 55;      /* 锁定标准名片比例 91mm × 55mm */
+            object-fit: cover;          /* 源图非此比例时裁切填充，保证墙面整齐不拉伸 */
             display: block;
         }
 
@@ -340,24 +342,24 @@
                 <div class="friends-grid" id="friendsGrid"></div>
             </div>
 
-            <!-- 点击后伸出的引导细线（固定定位，始终连接文字与右侧教程面板） -->
+            <!-- 点击后伸出的引导细线 -->
             <div class="apply-line" id="applyLine"></div>
 
-            <!-- 右侧「如何申请友链」教程（默认隐藏，点击后细线引导显示；随页面正常滚动，可滚出视图） -->
             <aside class="friends-aside" id="applyAside">
                 <h3>如何申请友链</h3>
+                
+                <p>要求：一张<strong>自己制作的</strong>名片正反面，可以不是偶像大师ip，尺寸最好为 91mm*55mm 或 90mm*54mm。</p>
                 <ol>
                     <li><a class="u-link" href="https://github.com/shiodd/page/issues" target="_blank" rel="noopener noreferrer">提交 Issue</a>，选择「申请友链」模板。</li>
-                    <li>填写：名称、名片正面图片链接、名片反面图片链接（图片需公网可直接访问，支持 png / jpg）。</li>
-                    <li>可选填写「个人主页链接」，审核通过后名字会变为可点击的链接。</li>
-                    <li>仓库管理者在 Issue 下评论 <code>/approve</code> 完成审核，系统会自动下载名片、写入友链墙并部署。</li>
+                    <li>填写：名字、名片正面图片链接、名片反面图片链接（图片需公网可直接访问，支持 png / jpg）。</li>
+                    <li>可选填写「个人主页链接」，名字会变为可点击的链接。</li>
+                    <li>审核通过后会自动下载你的名片并写入友链墙。</li>
                 </ol>
-                <p>部署完成后，即可在友链墙看到你的名片。</p>
             </aside>
         </div>
     </div>
 
-    <!-- 点击放大查看名片（逻辑/样式与 记录页 一致） -->
+    <!-- 点击放大查看名片 -->
     <div class="lightbox" id="lightbox">
         <img alt="放大图" />
         <div class="lightbox-bar">
