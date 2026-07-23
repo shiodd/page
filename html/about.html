@@ -251,14 +251,15 @@
                 preview.classList.add('bounce');
             }
             // 点击 SD 小人播放对应主题语音（按当前主题切换日/夜音效）
-            const sdAudio = new Audio();
+            // 提前为日/夜两种语音各建一个 Audio 并预加载，避免每次点击都重新拉取导致延迟
+            const sdAudioDay = new Audio('../sound/voice/about/sd_sun.mp3');
+            const sdAudioNight = new Audio('../sound/voice/about/sd_night.mp3');
+            [sdAudioDay, sdAudioNight].forEach(a => { a.preload = 'auto'; a.load(); });
             function playSdSfx() {
                 const isDark = document.documentElement.dataset.theme === 'dark';
-                sdAudio.src = isDark
-                    ? '../sound/voice/about/sd_night.mp3'
-                    : '../sound/voice/about/sd_sun.mp3';
-                sdAudio.currentTime = 0;
-                sdAudio.play().catch(() => {});
+                const a = isDark ? sdAudioNight : sdAudioDay;
+                a.currentTime = 0;
+                a.play().catch(() => {});
             }
             function positionPreview() {
                 const r = link.getBoundingClientRect();

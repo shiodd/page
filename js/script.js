@@ -21,6 +21,11 @@ const ICON_SUN = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" st
 const SFX_BASE = /\/html\//.test(window.location.pathname) ? '../sound/sfx/' : 'sound/sfx/';
 const sfxClick = new Audio(SFX_BASE + 'click.mp3');
 const sfxSelect = new Audio(SFX_BASE + 'select.mp3');
+// 提前缓存音效：强制预加载，避免首次点击才去网络拉取、解码导致延迟
+[sfxClick, sfxSelect].forEach(a => {
+    a.preload = 'auto';
+    a.load();
+});
 
 function playSfx(audio) {
     audio.currentTime = 0;
