@@ -1,7 +1,6 @@
 // ========== 统一导航栏 ==========
 // 各页面只需引入本脚本，导航与飞出色块会自动注入；无需再手写 nav DOM。
 
-// 导航项（label + 跳转目标）。带 data-target 的同页跳转由脚本处理；其余跨页跳转。
 const NAV_ITEMS = [
     { label: '首页',   href: 'index.html' },
     { label: '关于',   href: 'html/about.html' },
@@ -12,12 +11,10 @@ const NAV_ITEMS = [
 
 const NAV_COLORS = ['#c59fda', '#006AB6', '#D162CB', '#ffbad6', '#F3983B'];
 
-// 主题切换图标（用 currentColor，自动跟随主题深浅）
 const ICON_MOON = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
 const ICON_SUN = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
 
 // ========== 音效 ==========
-// 根据当前所在目录解析音频相对路径（与 resolveHref 逻辑一致）
 const SFX_BASE = /\/html\//.test(window.location.pathname) ? '../sound/sfx/' : 'sound/sfx/';
 const sfxClick = new Audio(SFX_BASE + 'click.mp3');
 const sfxSelect = new Audio(SFX_BASE + 'select.mp3');
@@ -90,7 +87,6 @@ function getCurrentPage() {
 }
 
 function showArrowBlock(color, type, leftPos) {
-    // 旧色块先沿各自进入方向飞走（用于同页刷新色条）
     document.querySelectorAll('.arrow-block').forEach(el => {
         el.classList.remove('stay');
         el.classList.add('fly-out');
@@ -106,7 +102,6 @@ function showArrowBlock(color, type, leftPos) {
         const block = document.createElement('div');
         const isHomeBar = leftPos === '420px';
         block.className = 'arrow-block stay ' + (type || 'vertical') + (isHomeBar ? ' home-bar' : '');
-        // 记录进入方向，供切主题/刷新时沿同方向飞出（不退回）
         const isDark = document.documentElement.dataset.theme === 'dark';
         block.dataset.entry = (type === 'horizontal')
             ? (isDark ? 'right' : 'left')
@@ -146,7 +141,6 @@ function showArrowBlock(color, type, leftPos) {
     }, 400);
 }
 
-// 让当前色块播放飞走动画（由多到少 + 飞出），并复位汉堡按钮颜色
 function flyOutCurrentBlock() {
     document.querySelectorAll('.arrow-block').forEach(el => {
         el.classList.remove('stay');
@@ -163,13 +157,11 @@ function flyOutCurrentBlock() {
     }
 }
 
-// 先播放飞走动画，再跳转（用于切换页面）
 function goPage(url) {
     flyOutCurrentBlock();
     setTimeout(() => { window.location.href = url; }, 450);
 }
 
-// ========== 名片翻转（可复用） ==========
 // 给所有 .card-flip 绑定点击翻转：点左半往右翻，点右半往左翻，再次点击复位。
 function bindCardFlip() {
     document.querySelectorAll('.card-flip').forEach(el => {
@@ -223,7 +215,6 @@ function initNav() {
             dropdown.classList.remove('open');
             toggle.classList.remove('active');
 
-            // 同页锚点跳转（存在对应区块时）
             if (target && document.getElementById(target)) {
                 document.getElementById(target).scrollIntoView({ behavior: 'smooth', block: 'center' });
                 setTimeout(() => showArrowBlock(color, getCurrentPage().type, getCurrentPage().left), 400);
@@ -249,19 +240,16 @@ function initNav() {
             }
         });
 
-        // 主题切换按钮（夜间模式）
         const themeBtn = document.getElementById('themeToggle');
         if (themeBtn) {
             themeBtn.addEventListener('click', () => {
                 playSfx(sfxClick);
                 const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
                 applyTheme(next);
-                // 切换主题后刷新当前页色条，使其反向飞入（夜间模式镜像到右侧）
                 const cfg = getCurrentPage();
                 if (cfg) {
                     showArrowBlock(cfg.color, cfg.type, cfg.left);
                 }
-                // 切换主题：整页淡入（字与图片）
                 document.body.classList.remove('theme-switch');
                 void document.body.offsetWidth;
                 document.body.classList.add('theme-switch');
@@ -270,7 +258,6 @@ function initNav() {
     });
 }
 
-// ========== 主题切换（夜间模式） ==========
 function setThemeAttr(theme) {
     document.documentElement.dataset.theme = theme;
 }
@@ -303,14 +290,12 @@ window.addEventListener('load', () => {
 
 // ========== 首页点击色条 ==========
 // 点击页面任意位置，从点击的 x 坐标落下一条贯穿全屏高度的色条，停留后从右侧飞走。
-// 颜色池 = 所有主题色（NAV_COLORS）+ 额外色，不写死在 CSS 里。
 const CLICK_BAR_COLORS = [
     '#E60012', '#0060A8', '#B0CA00', '#D9E5E6', '#F39800', '#000000',
     '#FC8A82', '#A4005B', '#007536', '#920783', '#FFE200', '#00A0E9', '#79C06E',
 ];
 
 function initClickBars() {
-    // 仅首页（含 .home-sub）启用
     if (!document.querySelector('.home-sub')) return;
 
     const pool = NAV_COLORS.concat(CLICK_BAR_COLORS);
@@ -318,10 +303,8 @@ function initClickBars() {
     document.addEventListener('click', (e) => {
         // 点到导航/菜单时不触发，避免与导航交互冲突
         if (e.target.closest('.top-nav')) return;
-        // 限定在文字内容区（.content-side），图片区（.profile-side）不可点
         if (e.target.closest('.profile-side')) return;
         if (!e.target.closest('.content-side')) return;
-        // 原色条（.arrow-block）所在横向位置不可点
         const ab = document.querySelector('.arrow-block');
         if (ab) {
             const r = ab.getBoundingClientRect();
@@ -335,7 +318,6 @@ function initClickBars() {
         bar.className = 'click-bar ' + (isUpper ? 'fly-down' : 'fly-up');
         bar.style.background = `linear-gradient(180deg, ${color}, ${color}cc)`;
 
-        // 色条放进内容区内部，定位相对内容区（避免被其半透明面板冲淡，又不遮挡文字）
         const host = document.querySelector('.content-side') || document.body;
         const rect = host.getBoundingClientRect();
         bar.style.top = (-rect.top) + 'px';                 // 对齐到视口顶部

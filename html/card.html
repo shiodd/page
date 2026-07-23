@@ -15,8 +15,6 @@
         })();
     </script>
     <style>
-        /* 背景颜色统一交给全局 css/style.css 的 body 定义，
-           此处仅覆盖布局相关属性（允许滚动 + 居中卡片）。 */
         body {
             min-height: 100vh;
             height: auto;
@@ -138,7 +136,6 @@
             }
         }
 
-        /* 暗色模式：时间线与导航主题色（.arrow-block）一致的方式变暗，不写死颜色 */
         [data-theme="dark"] .timeline::before,
         [data-theme="dark"] .timeline-item::before {
             filter: brightness(0.62) saturate(0.85);
@@ -159,7 +156,6 @@
     </div>
 
     <script src="../js/script.js"></script>
-    <!-- 名片数据在 HTML 外维护：data/cards.js（定义全局 cardData） -->
     <script src="data/cards.js"></script>
 
     <script>
@@ -186,7 +182,6 @@
 
             timeline.appendChild(itemEl);
         });
-        // 翻转逻辑由 ../js/script.js 的 bindCardFlip() 统一处理
     </script>
 </body>
 </html>

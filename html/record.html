@@ -232,13 +232,11 @@
     </div>
 
     <script src="../js/script.js"></script>
-    <!-- 随笔数据在 HTML 外维护：data/records.js（定义全局 recordData） -->
     <script src="data/records.js"></script>
     <script>
         // 数据来自 data/records.js，这里只负责渲染
         const list = document.getElementById('recordList');
 
-        // 图片点击放大（lightbox）
         const lightbox = document.getElementById('lightbox');
         const lightboxImg = lightbox.querySelector('img');
         const zoomInBtn = document.getElementById('zoomIn');

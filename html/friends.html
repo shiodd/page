@@ -142,7 +142,6 @@
         .u-link:hover::after {
             transform: scaleX(1);
         }
-        /* 教程内的链接文字用主题色（名片名字链接保持深色，由各自上下文决定） */
         .friends-aside .u-link {
             color: var(--accent);
         }
@@ -208,11 +207,6 @@
             color: #1a1a2e;
         }
 
-        /* 名片名字链接复用通用 .u-link（JS 中给带链接的名字加 class="u-link"）；
-           纯文本名字没有 <a>，自然无下划线 */
-
-
-        /* 点击放大遮罩（与 记录页 一致：无圆角、scale 缩放、底部控制条） */
         .lightbox {
             position: fixed;
             inset: 0;
@@ -306,7 +300,6 @@
             }
         }
 
-        /* 夜间模式：跟随主题，不再白色刺眼（与 record-item 一致） */
         [data-theme="dark"] .friend-card {
             background: rgba(40, 42, 60, 0.9);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
@@ -372,7 +365,6 @@
     </div>
 
     <script src="../js/script.js"></script>
-    <!-- 友链数据在 HTML 外维护：data/friends.js（定义全局 friendsData） -->
     <script src="data/friends.js"></script>
 
     <script>
@@ -408,7 +400,6 @@
             grid.appendChild(card);
         });
 
-        // ========== 点击放大（与 记录页 一致：scale 缩放、点遮罩/Esc 关闭） ==========
         const lightbox = document.getElementById('lightbox');
         const lightboxImg = lightbox.querySelector('img');
         const zoomInBtn = document.getElementById('zoomIn');
@@ -475,7 +466,7 @@
             const lr = applyLink.getBoundingClientRect();
             const ar = applyAside.getBoundingClientRect();
             const startX = lr.right;
-            const startY = lr.bottom + 1; // 从下划线所在位置延伸（下划线在文字底部下方约 1px）
+            const startY = lr.bottom + 1;
             const endX = ar.left;
             const len = Math.max(60, endX - startX);
             applyLine.style.left = startX + 'px';
@@ -483,7 +474,6 @@
             applyLine.style.width = len + 'px';
         }
 
-        // 视口变化（缩放/滚动）时重新锚定细线，避免错位
         function reflowApplyLine() {
             if (!applyOpen) return;
             if (window.innerWidth <= 760) {
@@ -494,7 +484,6 @@
             positionApplyLine();
         }
 
-        // 面板位于文档流中，随页面滚动（可滚出视图），无需固定定位；
         // 引导细线通过 getBoundingClientRect 实时连接文字与面板，滚动时由 reflowApplyLine 重锚。
 
         function onViewportChange() {
@@ -524,7 +513,6 @@
             applyLink.classList.remove('active');
         }
 
-        // 缩放时重锚细线；滚动时（面板随页面滚动）细线实时重锚，始终连接文字与面板
         window.addEventListener('resize', onViewportChange);
         if (friendsPage) friendsPage.addEventListener('scroll', reflowApplyLine);
 

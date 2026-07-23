@@ -30,7 +30,6 @@
             --accent: #c59fda;
         }
 
-        /* 「舆水幸子」下划线：与友链页通用下划线一致（固定 width:100% + scaleX 从左生长） */
         #sachikoLink {
             position: relative;
             color: var(--accent);
@@ -138,7 +137,6 @@
             color: #c2c7d6 !important;
         }
 
-        /* 点击舆水幸子时显示的 SD 小人预览图（定位由 JS 计算，贴在文字左侧） */
         #sachikoPreview {
             position: fixed;
             width: 130px;
@@ -163,7 +161,6 @@
             opacity: 0;
             transition: opacity 0.2s ease;
         }
-        /* 出场蹦跶动画（点击显示时触发，不影响 left/top 定位） */
         #sachikoPreview.bounce {
             animation: sachikoBounce 0.6s ease;
         }
@@ -213,12 +210,12 @@
         </script>
     </div>
 
-    <!-- 悬停舆水幸子时显示的 SD 小人预览 -->
+    <!-- 悬停时显示的 SD 小人预览 -->
     <img id="sachikoPreview" alt="舆水幸子 SD" />
 
     <script src="../js/script.js"></script>
     <script>
-        // 点击舆水幸子链接：切换显示/隐藏对应 SD 小人图（不跳转）
+        
         (function () {
             const link = document.getElementById('sachikoLink');
             const preview = document.getElementById('sachikoPreview');
@@ -229,12 +226,11 @@
                     ? '../image/about/sd/sd_night.png'
                     : '../image/about/sd/sd_sun.png';
             }
-            // 压暗滤镜跟随“图片本身”而非 data-theme，避免切换瞬间旧图亮度跳变
+            
             function sachikoFilter() {
                 const isDark = document.documentElement.dataset.theme === 'dark';
                 return isDark ? 'brightness(0.68) saturate(0.9)' : 'none';
             }
-            // 图片加载完成后按文字位置定位（贴在文字左侧、垂直居中）；换主题图后淡入
             const SWITCH_IN_MS = 1500; // 切换模式时 SD 小人的淡入时长
             preview.addEventListener('load', () => {
                 positionPreview();
@@ -246,13 +242,11 @@
                     setTimeout(() => { preview.style.transition = ''; }, SWITCH_IN_MS);
                 }
             });
-            // 蹦跶一下（先移除再 reflow，保证可重复触发）
             function bouncePreview() {
                 preview.classList.remove('bounce');
                 void preview.offsetWidth;
                 preview.classList.add('bounce');
             }
-            // 点击 SD 小人播放对应主题语音（按当前主题切换日/夜音效）
             // 提前为日/夜两种语音各建一个 Audio 并预加载，避免每次点击都重新拉取导致延迟
             const sdAudioDay = new Audio('../sound/voice/about/sd_sun.mp3');
             const sdAudioNight = new Audio('../sound/voice/about/sd_night.mp3');
@@ -287,7 +281,6 @@
                     bouncePreview(); // 出场蹦跶
                 }
             });
-            // 鼠标按下蓄力、松开蹦跶（一次点击只蹦一次，避免 click 重复触发）
             let pressing = false;
             preview.addEventListener('mousedown', (e) => {
                 e.stopPropagation();
@@ -308,7 +301,6 @@
             });
             // 在元素外松开也能蹦跶
             document.addEventListener('mouseup', releaseBounce);
-            // 切换日/夜模式时，若 SD 正显示则同步更换对应主题图（带淡出淡入过渡）
             const themeObserver = new MutationObserver(() => {
                 if (preview.classList.contains('show')) {
                     preview.style.transition = ''; // 清残留 inline 过渡，确保淡出用 .switching 的 0.2s
@@ -318,7 +310,7 @@
                     setTimeout(() => {
                         preview.style.filter = sachikoFilter();
                         preview.src = sachikoSrc();
-                    }, 250); // 与淡出过渡(0.2s)一致，确保旧图淡出后再换
+                    }, 250);
                 }
             });
             themeObserver.observe(document.documentElement, {

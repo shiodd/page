@@ -1,4 +1,3 @@
-// 名片数据（在 HTML 外维护，由 card.html 引入为全局 cardData）
 const cardData = [
 
     {

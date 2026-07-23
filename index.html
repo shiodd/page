@@ -35,13 +35,11 @@
 
     <script src="js/script.js"></script>
     <script>
-        // 用所有主题色（NAV_COLORS）生成「整段文字同一种颜色 → 平滑过渡到下一个颜色」的动画，
         // 动态写入 keyframes 并注入样式，避免写死颜色。
         (function () {
             var el = document.querySelector('.gradient-text');
             if (!el || typeof NAV_COLORS === 'undefined' || !NAV_COLORS.length) return;
 
-            // 默认（静止态）使用首页主题色（NAV_COLORS[0]），让「輝き」默认就是首页色，不写死
             var homeColor = NAV_COLORS[0];
             el.style.color = homeColor;
 

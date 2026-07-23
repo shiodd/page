@@ -45,7 +45,6 @@
     color: #fff;
 }
 
-/* 夜间模式：首页布局镜像（图片移到右侧，与白天相反） */
 [data-theme="dark"] .main-wrap {
     flex-direction: row-reverse;
     position: relative;
@@ -59,12 +58,10 @@
     /* 夜间压暗图片，融入深色背景 */
     filter: brightness(0.68) saturate(0.9);
 }
-/* 夜间模式：各子页图片（名片/头像/相册）统一压暗 */
 [data-theme="dark"] img {
     filter: brightness(0.7) saturate(0.9);
 }
 
-/* 夜间模式：色条飞入方向反转为从下到上（飞出保持原样） */
 @keyframes arrowRise {
     0% {
         opacity: 0;
@@ -118,7 +115,6 @@ body.theme-switch .friends-page {
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
         "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
-    /* 固定白天渐变：夜间黑色由下方叠加层（opacity 过渡）提供，从而实现平滑渐变黑；底色调柔和不刺眼 */
     background: linear-gradient(135deg, #d3dae7 0%, #a8b8d2 100%);
     display: flex;
     padding: 0;
@@ -131,8 +127,6 @@ body {
     transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* 夜间模式背景：用固定暗色叠加层 + opacity 过渡实现平滑渐变黑
-   （渐变无法直接过渡，故用叠加层的方式） */
 body::before {
     content: "";
     position: fixed;
@@ -184,7 +178,6 @@ body::before {
     box-shadow: var(--shadow);
 }
 
-/* 悬停时覆盖 JS 注入的彩色背景，跟随主题色（浅色深条 / 深色浅条） */
 .nav-toggle:hover span {
     background: var(--text) !important;
 }
@@ -210,7 +203,6 @@ body::before {
     transform: translateY(-7.5px) rotate(-45deg);
 }
 
-/* 主题切换按钮（太阳/月亮） */
 .theme-toggle-btn {
     width: 44px;
     height: 44px;
@@ -349,7 +341,6 @@ body::before {
     font-weight: 600;
 }
 
-/* 进入：由少到多（scale 展开）+ 从屏外飞入 */
 .arrow-block.stay {
     animation: arrowDrop 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
@@ -358,7 +349,6 @@ body::before {
     animation: barSlideIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* 飞出：沿各自进入方向继续飞出（不退回），由多到少（scale 收缩） */
 .arrow-block.fly-out-down {
     animation: flyOutDown 0.4s ease-in forwards;
 }
@@ -450,7 +440,6 @@ body::before {
     display: flex;
 }
 
-/* ========== Profile Side (Left) ========== */
 .profile-side {
     width: 420px;
     flex-shrink: 0;
@@ -522,7 +511,6 @@ body::before {
     background: rgba(255, 255, 255, 0.25);
 }
 
-/* ========== Content Side (Right) ========== */
 .content-side {
     flex: 1;
     padding: 4rem 3.5rem;
@@ -561,9 +549,6 @@ body::before {
     transition: color 0.6s ease;
 }
 
-/* 日语标语：只有「輝き」两个字参与渐变。悬停整句副标题时，
-   仅该 span 保持同一种颜色并平滑过渡到下一个主题色（循环）。
-   动画的 keyframes 由 JS 用 NAV_COLORS 动态生成，不写死颜色。 */
 .gradient-text {
     transition: color 0.6s ease;
 }
@@ -571,7 +556,6 @@ body::before {
     animation: themeColorShift 6s linear infinite;
 }
 
-/* 夜间模式：与导航主题色（.arrow-block）保持一致的方式变暗，避免亮色刺眼（不写死颜色） */
 [data-theme="dark"] .gradient-text {
     filter: brightness(0.62) saturate(0.85);
 }
@@ -605,7 +589,6 @@ body::before {
     18%  { transform: translateY(0);     opacity: 1; }
     100% { transform: translateY(-100%); opacity: 1; }
 }
-/* 夜间模式：点击色条与导航主题色一致的方式变暗（不写死颜色） */
 [data-theme="dark"] .click-bar {
     filter: brightness(0.62) saturate(0.85);
 }
