@@ -102,7 +102,9 @@
         }
 
         .about-card {
-            display: inline-block;
+            display: block;
+            width: 100%;
+            max-width: min(500px, 42vw);
             margin-top: 1.5rem;
             cursor: pointer;
             user-select: none;
@@ -111,7 +113,7 @@
 
         .about-card img {
             width: 100%;
-            max-width: 500px;
+            max-width: 100%;
             height: auto;
             display: block;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
