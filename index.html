@@ -16,7 +16,6 @@
     </script>
 </head>
 <body>
-    <!-- 导航与飞出色块由 js/script.js 统一注入 -->
 
     <!-- 首页 -->
     <div class="main-wrap">
@@ -35,7 +34,7 @@
 
     <script src="js/script.js"></script>
     <script>
-        // 动态写入 keyframes 并注入样式，避免写死颜色。
+
         (function () {
             var el = document.querySelector('.gradient-text');
             if (!el || typeof NAV_COLORS === 'undefined' || !NAV_COLORS.length) return;
@@ -43,7 +42,6 @@
             var homeColor = NAV_COLORS[0];
             el.style.color = homeColor;
 
-            // 动画首尾都用首页主题色，悬停/离开时从首页色平滑过渡到其它主题色，无跳变
             var seq = NAV_COLORS.slice().concat([homeColor]);
 
             var n = seq.length - 1;             // 颜色段数
