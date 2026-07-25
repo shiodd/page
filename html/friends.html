@@ -454,7 +454,7 @@
             lightboxImg.src = showingBack ? currentFriend.back : currentFriend.front;
             flipBtn.textContent = showingBack ? '正面' : '反面';
         });
-        // ========== 如何申请友链：默认隐藏，点击后细线引导并显示右侧教程 ==========
+        // ========== 如何申请友链 ==========
         const applyLink = document.getElementById('applyLink');
         const applyAside = document.getElementById('applyAside');
         const applyLine = document.getElementById('applyLine');
@@ -493,17 +493,15 @@
         function openApply() {
             applyOpen = true;
             applyLink.classList.add('active');
-            // 窄屏两栏已堆叠，直接显示，不画横向细线
             if (window.innerWidth <= 760) {
                 applyAside.classList.add('show');
                 applyLine.classList.remove('show');
                 return;
             }
             applyLine.classList.remove('show');
-            void applyLine.offsetWidth; // 强制重排，确保细线从 0 重新生长
+            void applyLine.offsetWidth; 
             positionApplyLine();
             applyLine.classList.add('show');
-            // 细线到位后显示教程；下划线与细线在展开期间保持显示，关闭时才收回
             setTimeout(() => applyAside.classList.add('show'), 470);
         }
         function closeApply() {
