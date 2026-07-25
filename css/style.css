@@ -766,3 +766,20 @@ body::before {
 [data-theme="dark"] .mobile-notice__btn {
     background: #7a6387;
 }
+
+/* ========== 不蒜子统计 ========== */
+.busuanzi-stats {
+    margin-top: 1.5rem;
+    font-size: 0.85rem;
+    line-height: 1.9;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.busuanzi-stats p {
+    margin: 0;
+}
+
+.busuanzi-stats span {
+    color: var(--text-soft);
+}
