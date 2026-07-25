@@ -779,7 +779,3 @@ body::before {
 .busuanzi-stats p {
     margin: 0;
 }
-
-.busuanzi-stats span {
-    color: var(--text-soft);
-}

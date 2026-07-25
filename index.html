@@ -26,9 +26,28 @@
             <p class="home-sub"><span class="gradient-text">輝き</span>の向こう側へ！</p>
 
             <div class="busuanzi-stats">
-                <script src="//cdn.busuanzi.cc/busuanzi/3.6.9/busuanzi.min.js" defer></script>
                 <p>您是第<span id="busuanzi_site_uv"></span>个访问本站的P</p>
             </div>
+            <script>
+                (function () {
+                    var s = document.createElement('script');
+                    s.src = 'https://cdn.busuanzi.cc/busuanzi/3.6.9/busuanzi.min.js';
+                    s.async = true;
+                    var done = false;
+                    s.onload = function () { done = true; };
+                    s.onerror = function () { showPlaceholder(); };
+                    document.head.appendChild(s);
+                    setTimeout(function () {
+                        if (!done) showPlaceholder();
+                    }, 3000);
+                    function showPlaceholder() {
+                        var el = document.getElementById('busuanzi_site_uv');
+                        if (el && !el.textContent.trim()) {
+                            el.textContent = '--';
+                        }
+                    }
+                })();
+            </script>
 
         </div>
         </div>
