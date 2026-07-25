@@ -354,4 +354,48 @@ function initClickBars() {
 
         bar.addEventListener('animationend', () => bar.remove());
     });
+
+    startAutoClickBars();
+}
+
+function spawnClickBar(x, y) {
+    const pool = NAV_COLORS.concat(CLICK_BAR_COLORS);
+    const color = pool[Math.floor(Math.random() * pool.length)];
+    const bar = document.createElement('div');
+    const isUpper = y < window.innerHeight / 2;
+    bar.className = 'click-bar ' + (isUpper ? 'fly-down' : 'fly-up');
+    bar.style.background = `linear-gradient(180deg, ${color}, ${color}cc)`;
+
+    const host = document.querySelector('.content-side') || document.body;
+    const rect = host.getBoundingClientRect();
+    bar.style.top = (-rect.top) + 'px';
+    bar.style.left = (x - rect.left - 22) + 'px';
+    host.appendChild(bar);
+    bar.addEventListener('animationend', () => bar.remove());
+}
+
+function startAutoClickBars() {
+    const schedule = () => {
+        const delay = 5000 + Math.random() * 5000;
+        setTimeout(() => {
+            spawnAutoBar();
+            schedule();
+        }, delay);
+    };
+    schedule();
+}
+
+function spawnAutoBar() {
+    const host = document.querySelector('.content-side') || document.body;
+    const rect = host.getBoundingClientRect();
+    const ab = document.querySelector('.arrow-block');
+    let x = 0;
+    for (let i = 0; i < 20; i++) {
+        x = rect.left + Math.random() * rect.width;
+        if (!ab) break;
+        const r = ab.getBoundingClientRect();
+        if (x < r.left || x > r.right) break;
+    }
+    const y = Math.random() * window.innerHeight;
+    spawnClickBar(x, y);
 }
