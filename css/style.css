@@ -701,3 +701,68 @@ body::before {
         height: 2px;
     }
 }
+
+/* ========== 移动端访问提示 ========== */
+.mobile-notice {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: rgba(20, 22, 35, 0.55);
+    backdrop-filter: blur(4px);
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.mobile-notice.is-hide {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.mobile-notice__card {
+    width: 100%;
+    max-width: 360px;
+    background: var(--surface-strong);
+    color: var(--text-strong);
+    border-radius: 0;
+    padding: 2rem 1.75rem;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+}
+
+.mobile-notice__title {
+    margin: 0 0 0.75rem;
+    font-size: 1.2rem;
+    color: var(--text-strong);
+}
+
+.mobile-notice__desc {
+    margin: 0 0 1.5rem;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--text-soft);
+}
+
+.mobile-notice__btn {
+    display: inline-block;
+    padding: 0.6rem 1.6rem;
+    border: none;
+    border-radius: 0;
+    background: #c59fda;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.mobile-notice__btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+}
+
+[data-theme="dark"] .mobile-notice__btn {
+    background: #7a6387;
+}

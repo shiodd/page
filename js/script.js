@@ -1,5 +1,4 @@
 // ========== 统一导航栏 ==========
-// 各页面只需引入本脚本，导航与飞出色块会自动注入；无需再手写 nav DOM。
 
 const NAV_ITEMS = [
     { label: '首页',   href: 'index.html' },
@@ -18,7 +17,7 @@ const ICON_SUN = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" st
 const SFX_BASE = /\/html\//.test(window.location.pathname) ? '../sound/sfx/' : 'sound/sfx/';
 const sfxClick = new Audio(SFX_BASE + 'click.mp3');
 const sfxSelect = new Audio(SFX_BASE + 'select.mp3');
-// 提前缓存音效：强制预加载，避免首次点击才去网络拉取、解码导致延迟
+// 提前缓存音效
 [sfxClick, sfxSelect].forEach(a => {
     a.preload = 'auto';
     a.load();
@@ -221,7 +220,7 @@ function initNav() {
                 return;
             }
 
-            // 跨页跳转：先飞走色块，再跳转
+            // 跨页跳转
             let url = null;
             if (href) {
                 url = resolveHref(href);
@@ -274,6 +273,36 @@ function initTheme() {
     setThemeAttr(saved || (prefersDark ? 'dark' : 'light'));
 }
 
+// ========== 移动端访问提示 ==========
+function isMobileDevice() {
+    return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone/i.test(navigator.userAgent);
+}
+
+function initMobileNotice() {
+    if (!isMobileDevice()) return;
+    if (sessionStorage.getItem('mobileNoticeShown')) return;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'mobile-notice';
+    overlay.innerHTML = `
+        <div class="mobile-notice__card">
+            <h2 class="mobile-notice__title">使用 PC 获取更好体验</h2>
+            <p class="mobile-notice__desc">当前页面在手机上可能无法完整呈现，建议使用电脑浏览器访问以获得最佳浏览效果。</p>
+            <button class="mobile-notice__btn" type="button">继续访问</button>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+
+    const close = () => {
+        sessionStorage.setItem('mobileNoticeShown', '1');
+        overlay.classList.add('is-hide');
+        document.body.style.overflow = '';
+        overlay.addEventListener('transitionend', () => overlay.remove(), { once: true });
+    };
+    overlay.querySelector('.mobile-notice__btn').addEventListener('click', close);
+}
+
 // ========== 初始化 ==========
 window.addEventListener('load', () => {
     injectNav();
@@ -281,6 +310,7 @@ window.addEventListener('load', () => {
     initTheme();
     bindCardFlip();
     initClickBars();
+    initMobileNotice();
 
     const config = getCurrentPage();
     if (config) {
@@ -289,7 +319,6 @@ window.addEventListener('load', () => {
 });
 
 // ========== 首页点击色条 ==========
-// 点击页面任意位置，从点击的 x 坐标落下一条贯穿全屏高度的色条，停留后从右侧飞走。
 const CLICK_BAR_COLORS = [
     '#E60012', '#0060A8', '#B0CA00', '#D9E5E6', '#F39800', '#000000',
     '#FC8A82', '#A4005B', '#007536', '#920783', '#FFE200', '#00A0E9', '#79C06E',
@@ -301,7 +330,6 @@ function initClickBars() {
     const pool = NAV_COLORS.concat(CLICK_BAR_COLORS);
 
     document.addEventListener('click', (e) => {
-        // 点到导航/菜单时不触发，避免与导航交互冲突
         if (e.target.closest('.top-nav')) return;
         if (e.target.closest('.profile-side')) return;
         if (!e.target.closest('.content-side')) return;
@@ -313,15 +341,15 @@ function initClickBars() {
 
         const color = pool[Math.floor(Math.random() * pool.length)];
         const bar = document.createElement('div');
-        // 点击位置在屏幕上半 → 从顶部落下、从下方飞走；下半 → 从底部升起、从上方飞走
+
         const isUpper = e.clientY < window.innerHeight / 2;
         bar.className = 'click-bar ' + (isUpper ? 'fly-down' : 'fly-up');
         bar.style.background = `linear-gradient(180deg, ${color}, ${color}cc)`;
 
         const host = document.querySelector('.content-side') || document.body;
         const rect = host.getBoundingClientRect();
-        bar.style.top = (-rect.top) + 'px';                 // 对齐到视口顶部
-        bar.style.left = (e.clientX - rect.left - 22) + 'px'; // 22 = 宽度一半，居中于点击点
+        bar.style.top = (-rect.top) + 'px';                 
+        bar.style.left = (e.clientX - rect.left - 22) + 'px'; 
         host.appendChild(bar);
 
         bar.addEventListener('animationend', () => bar.remove());
