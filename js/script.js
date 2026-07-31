@@ -261,16 +261,30 @@ function setThemeAttr(theme) {
     document.documentElement.dataset.theme = theme;
 }
 
+// 预加载首页另一主题的配图，切换时无需重新从网络拉取
+const HOME_IMAGES = {
+    light: 'image/index/index.png',
+    dark: 'image/index/index_night.png'
+};
+function preloadAltHomeImage(theme) {
+    const alt = theme === 'dark' ? HOME_IMAGES.light : HOME_IMAGES.dark;
+    const img = new Image();
+    img.src = alt;
+}
+
 function applyTheme(theme) {
     setThemeAttr(theme);
     try { localStorage.setItem('theme', theme); } catch (e) {}
+    preloadAltHomeImage(theme);
 }
 
 function initTheme() {
     let saved = null;
     try { saved = localStorage.getItem('theme'); } catch (e) {}
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setThemeAttr(saved || (prefersDark ? 'dark' : 'light'));
+    const theme = saved || (prefersDark ? 'dark' : 'light');
+    setThemeAttr(theme);
+    preloadAltHomeImage(theme);
 }
 
 // ========== 移动端访问提示 ==========
