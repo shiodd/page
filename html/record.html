@@ -309,6 +309,8 @@
                 gallery.className = 'gallery';
                 item.images.forEach(src => {
                     const img = document.createElement('img');
+                    img.loading = 'lazy';   // 列表图懒加载，节省流量
+                    img.decoding = 'async';
                     img.src = src;
                     img.alt = item.title || '';
                     img.addEventListener('click', () => {

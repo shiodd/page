@@ -395,7 +395,7 @@
                 : friend.name;
 
             card.innerHTML = `
-                <img src="${friend.front}" alt="${friend.name}名片正面" />
+                <img src="${friend.front}" alt="${friend.name}名片正面" loading="lazy" decoding="async" />
                 <div class="name">${nameHtml}</div>
             `;
             // 点名称链接只跳转，不触发放大
