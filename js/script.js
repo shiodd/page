@@ -40,20 +40,6 @@ function playSfx(audio) {
     if (!sfxEnabled) return;
     audio.currentTime = 0;
     audio.play().catch(() => {});
-    // 只有真正的点击音才扩散波纹，悬停音不触发，避免过于晃动
-    if (audio === sfxClick) rippleSfxBtn();
-}
-
-// 让音效按钮扩散一圈波纹（重新触发需先移除类并强制重排）
-// 动画结束后移除类，这样音乐播放时的循环波纹能继续
-function rippleSfxBtn() {
-    const btn = document.getElementById('sfxToggle');
-    if (!btn) return;
-    btn.classList.remove('is-playing');
-    void btn.offsetWidth;
-    btn.classList.add('is-playing');
-    clearTimeout(btn._rippleTimer);
-    btn._rippleTimer = setTimeout(() => btn.classList.remove('is-playing'), 900);
 }
 
 // ========== 迷你播放列表 ==========
@@ -62,6 +48,10 @@ const MUSIC_LIST = [
     { title: '秋山裕和,むにょっ - ★サティジムノペディ', file: '秋山裕和,むにょっ - ★サティジムノペディ.mp3' },
     // 新增歌曲：往这里加一行 { title: '显示名', file: '文件名.mp3' }
 ];
+
+// 实时频谱只在 http(s) 下启用：file:// 下媒体被视为跨域，
+// 接入 Web Audio 会被静音，因此那种情况自动降级为 CSS 波动动画
+const CAN_ANALYSE = window.location.protocol === 'http:' || window.location.protocol === 'https:';
 
 function initMusicPlayer() {
     if (!MUSIC_LIST.length) return;
@@ -77,7 +67,10 @@ function initMusicPlayer() {
             <div class="mp-bar" id="mpBar"><span id="mpProgress"></span></div>
         </div>
     `;
-    document.body.appendChild(wrap);
+    // 放在顶部导航按钮组的最左边
+    const nav = document.getElementById('topNav');
+    if (nav) nav.insertBefore(wrap, nav.firstChild);
+    else document.body.appendChild(wrap);
 
     const audio = new Audio();
     audio.preload = 'metadata';
@@ -88,11 +81,96 @@ function initMusicPlayer() {
     const progEl = wrap.querySelector('#mpProgress');
     let index = 0;
 
-    // 播放时在音效按钮上持续扩散波纹，作为“正在出声”的视觉反馈
-    function setMusicVisual(on) {
-        const btn = document.getElementById('sfxToggle');
-        if (btn) btn.classList.toggle('is-music', on);
+    // 播放条内的水波：波幅随音乐能量起伏（取不到频谱时也有轻微荡漾）
+    const WAVE_H = 15;
+    const waveCanvas = document.createElement('canvas');
+    waveCanvas.className = 'mp-wave';
+    wrap.appendChild(waveCanvas);
+    const wctx = waveCanvas.getContext('2d');
+
+    let audioCtx = null, analyser = null, freqData = null;
+    let rafId = null, phase = 0, energy = 0, targetEnergy = 0;
+
+    // 接入 Web Audio 读取真实频谱（一个 audio 元素只能创建一次 source）
+    function ensureAudioGraph() {
+        if (audioCtx || !CAN_ANALYSE) return false;
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return false;
+        try {
+            audioCtx = new AC();
+            const src = audioCtx.createMediaElementSource(audio);
+            analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 64;
+            analyser.smoothingTimeConstant = 0.8;
+            src.connect(analyser);
+            analyser.connect(audioCtx.destination);
+            freqData = new Uint8Array(analyser.frequencyBinCount);
+            return true;
+        } catch (e) {
+            audioCtx = null;
+            return false;
+        }
     }
+
+    function resizeWave() {
+        const dpr = window.devicePixelRatio || 1;
+        const w = wrap.clientWidth || 180;
+        waveCanvas.width = Math.round(w * dpr);
+        waveCanvas.height = Math.round(WAVE_H * dpr);
+        wctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    // 画一层正弦波并填充下方，两层错开叠加即成水面感
+    function fillWave(w, amp, ph, color, baseOffset) {
+        wctx.beginPath();
+        wctx.moveTo(0, WAVE_H);
+        for (let x = 0; x <= w; x += 2) {
+            const y = WAVE_H - baseOffset + Math.sin((x / w) * Math.PI * 3 + ph) * amp;
+            wctx.lineTo(x, y);
+        }
+        wctx.lineTo(w, WAVE_H);
+        wctx.closePath();
+        wctx.fillStyle = color;
+        wctx.fill();
+    }
+
+    function drawFrame() {
+        if (analyser && freqData) {
+            analyser.getByteFrequencyData(freqData);
+            let sum = 0;
+            for (let i = 0; i < freqData.length; i++) sum += freqData[i];
+            targetEnergy = (sum / freqData.length) / 255;
+        }
+        energy += (targetEnergy - energy) * 0.12; // 平滑跟随，避免抖动
+
+        const w = wrap.clientWidth || 180;
+        wctx.clearRect(0, 0, w, WAVE_H);
+
+        phase += 0.03 + energy * 0.06;   // 声音越大，水流动越快
+        const amp = 1.6 + energy * 5.5;  // 静时微澜，响时起伏
+        const dark = document.documentElement.dataset.theme === 'dark';
+        fillWave(w, amp, phase, dark ? 'rgba(122,99,135,0.55)' : 'rgba(197,159,218,0.55)', 3);
+        fillWave(w, amp * 0.7, phase * 1.5 + 1.7, dark ? 'rgba(122,99,135,0.28)' : 'rgba(197,159,218,0.28)', 1);
+
+        rafId = requestAnimationFrame(drawFrame);
+    }
+
+    function startVisual() {
+        resizeWave();
+        ensureAudioGraph();
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        if (rafId) cancelAnimationFrame(rafId);
+        drawFrame();
+    }
+
+    function stopVisual() {
+        if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+        energy = 0;
+        targetEnergy = 0;
+        wctx.clearRect(0, 0, wrap.clientWidth || 180, WAVE_H); // 暂停时水面归静
+    }
+
+    window.addEventListener('resize', () => { if (rafId) resizeWave(); });
 
     function loadTrack(i) {
         index = (i + MUSIC_LIST.length) % MUSIC_LIST.length;
@@ -121,10 +199,10 @@ function initMusicPlayer() {
     });
     audio.addEventListener('play', () => {
         playBtn.innerHTML = '&#10073;&#10073;'; // 暂停图标
-        setMusicVisual(true);
+        startVisual();
     });
-    audio.addEventListener('ended', () => { loadTrack(index + 1); play(); });
-    audio.addEventListener('pause', () => { playBtn.innerHTML = '&#9654;'; setMusicVisual(false); });
+    audio.addEventListener('ended', () => { stopVisual(); loadTrack(index + 1); play(); });
+    audio.addEventListener('pause', () => { playBtn.innerHTML = '&#9654;'; stopVisual(); });
 
     // 点击进度条跳转
     barEl.addEventListener('click', (e) => {
@@ -166,9 +244,6 @@ function injectNav() {
             <span class="icon icon-sun">${ICON_SUN}</span>
         </button>
         <button class="sfx-toggle-btn" id="sfxToggle" aria-label="音效开关" aria-pressed="false">
-            <span class="wave wave-1"></span>
-            <span class="wave wave-2"></span>
-            <span class="wave wave-3"></span>
             <span class="icon icon-sound-on">${ICON_SOUND_ON}</span>
             <span class="icon icon-sound-off">${ICON_SOUND_OFF}</span>
         </button>
