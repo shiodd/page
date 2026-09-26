@@ -106,7 +106,7 @@ function initMusicPlayer() {
             audioCtx = new AC();
             const src = audioCtx.createMediaElementSource(audio);
             analyser = audioCtx.createAnalyser();
-            analyser.fftSize = 64;
+            analyser.fftSize = 256;            // 128 个频段，波形细节更丰富
             analyser.smoothingTimeConstant = 0.8;
             src.connect(analyser);
             analyser.connect(audioCtx.destination);
@@ -126,13 +126,52 @@ function initMusicPlayer() {
         wctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
-    // 画一层正弦波并填充下方，两层错开叠加即成水面感
-    function fillWave(w, amp, ph, color, baseOffset) {
+    // 横向采样点数：把频谱按“低频→高频”铺在播放条的横向位置上
+    const WAVE_BINS = 40;
+    const rawSpec = new Float32Array(WAVE_BINS);
+    const spec = new Float32Array(WAVE_BINS);
+
+    // 读取频谱并归一化到 0..1（取中低频段，那里能量最集中）
+    function sampleSpectrum() {
+        if (!analyser || !freqData) {
+            // 取不到频谱（如 file://）时用缓慢起伏的正弦，保持水面在动
+            for (let i = 0; i < WAVE_BINS; i++) {
+                rawSpec[i] = Math.max(0,
+                    0.10 + Math.sin(i * 0.45 + phase * 1.2) * 0.06 +
+                           Math.sin(i * 0.17 - phase * 0.7) * 0.04);
+            }
+            return;
+        }
+        analyser.getByteFrequencyData(freqData);
+        const usable = Math.max(1, Math.floor(freqData.length * 0.7));
+        for (let i = 0; i < WAVE_BINS; i++) {
+            const start = Math.floor((i / WAVE_BINS) * usable);
+            const end = Math.max(start + 1, Math.floor(((i + 1) / WAVE_BINS) * usable));
+            let sum = 0, count = 0;
+            for (let j = start; j < end && j < freqData.length; j++) { sum += freqData[j]; count++; }
+            rawSpec[i] = count ? (sum / count) / 255 : 0;
+        }
+    }
+
+    // 取任意横向位置的频谱值，相邻点线性插值，避免台阶感
+    function specAt(t) {
+        const pos = t * (WAVE_BINS - 1);
+        const i0 = Math.floor(pos);
+        const i1 = Math.min(WAVE_BINS - 1, i0 + 1);
+        const f = pos - i0;
+        return spec[i0] * (1 - f) + spec[i1] * f;
+    }
+
+    // 由频谱塑形的水面，再叠一层行进涟漪让它像水在流
+    function fillSpecWave(w, ph, color, lift, scale) {
+        const baseY = WAVE_H - lift;
         wctx.beginPath();
         wctx.moveTo(0, WAVE_H);
         for (let x = 0; x <= w; x += 2) {
-            const y = WAVE_H - baseOffset + Math.sin((x / w) * Math.PI * 3 + ph) * amp;
-            wctx.lineTo(x, y);
+            const t = x / w;
+            const bump = specAt(t) * 10 * scale;                // 频谱决定起伏高低
+            const ripple = Math.sin(t * Math.PI * 4 + ph) * 1.1; // 水的行进感
+            wctx.lineTo(x, baseY - bump + ripple);
         }
         wctx.lineTo(w, WAVE_H);
         wctx.closePath();
@@ -156,25 +195,28 @@ function initMusicPlayer() {
     }
 
     function drawFrame() {
-        if (analyser && freqData) {
-            analyser.getByteFrequencyData(freqData);
-            let sum = 0;
-            for (let i = 0; i < freqData.length; i++) sum += freqData[i];
-            targetEnergy = (sum / freqData.length) / 255;
+        sampleSpectrum();
+
+        // 空间平滑（去毛刺）+ 时间平滑（去抖动）
+        let sum = 0;
+        for (let i = 0; i < WAVE_BINS; i++) {
+            const prev = rawSpec[Math.max(0, i - 1)];
+            const next = rawSpec[Math.min(WAVE_BINS - 1, i + 1)];
+            const smooth = (prev + rawSpec[i] * 2 + next) / 4;
+            spec[i] += (smooth - spec[i]) * 0.3;
+            sum += spec[i];
         }
-        energy += (targetEnergy - energy) * 0.12; // 平滑跟随，避免抖动
+        const energyNow = sum / WAVE_BINS;
 
         const w = wrap.clientWidth || 180;
         wctx.clearRect(0, 0, w, WAVE_H);
-
-        phase += 0.03 + energy * 0.06;   // 声音越大，水流动越快
-        const amp = 1.6 + energy * 5.5;  // 静时微澜，响时起伏
+        phase += 0.04 + energyNow * 0.05; // 声音越大，水流动越快
 
         // 水波颜色跟随当前页面的主题色
         const cfg = getCurrentPage();
         const base = (cfg && cfg.color) || '#c59fda';
-        fillWave(w, amp, phase, themeRgba(base, 0.55), 3);
-        fillWave(w, amp * 0.7, phase * 1.5 + 1.7, themeRgba(base, 0.28), 1);
+        fillSpecWave(w, phase, themeRgba(base, 0.55), 4, 1);
+        fillSpecWave(w, phase * 1.4 + 1.9, themeRgba(base, 0.26), 2, 0.62);
 
         rafId = requestAnimationFrame(drawFrame);
     }
@@ -191,6 +233,7 @@ function initMusicPlayer() {
         if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
         energy = 0;
         targetEnergy = 0;
+        spec.fill(0); // 暂停后重新播放时波形从静止开始
         wctx.clearRect(0, 0, wrap.clientWidth || 180, WAVE_H); // 暂停时水面归静
     }
 
@@ -200,10 +243,38 @@ function initMusicPlayer() {
         index = (i + tracks.length) % tracks.length;
         const t = tracks[index];
         audio.src = encodeURI(MUSIC_BASE + t.file);
-        titleEl.textContent = t.title;
+
+        // 曲名放进内层 span，过长时才滚动
+        titleEl.textContent = '';
+        const span = document.createElement('span');
+        span.className = 'mp-title-text';
+        span.textContent = t.title;
+        titleEl.appendChild(span);
+        setupMarquee(span);
+
         progEl.style.width = '0%';
         renderList();
     }
+
+    // 曲名超出播放条宽度时来回滚动，短的保持静止
+    function setupMarquee(span) {
+        span.classList.remove('is-marquee');
+        span.style.removeProperty('--marquee-shift');
+        span.style.removeProperty('animation-duration');
+
+        const overflow = span.scrollWidth - titleEl.clientWidth;
+        if (overflow <= 2) return;
+
+        span.style.setProperty('--marquee-shift', overflow + 'px');
+        span.style.animationDuration = Math.min(18, 7 + overflow / 18) + 's';
+        void span.offsetWidth; // 强制重排后再启动动画
+        span.classList.add('is-marquee');
+    }
+
+    window.addEventListener('resize', () => {
+        const span = titleEl.querySelector('.mp-title-text');
+        if (span) setupMarquee(span);
+    });
 
     // 用 play / pause 事件驱动 UI，比依赖 play() 的 promise 更可靠
     function play() {

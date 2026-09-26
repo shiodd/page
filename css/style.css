@@ -335,6 +335,9 @@ body::before {
     box-shadow: var(--shadow);
     color: var(--text);
     opacity: 1; /* 常驻可见，不再淡化 */
+    /* 曲名与列表是界面元素，禁止鼠标拖动选中 */
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 /* 播放条内的水波（canvas 由 JS 绘制，波幅随音乐起伏） */
@@ -403,6 +406,36 @@ body::before {
 
 .mp-title:hover {
     color: var(--text-strong);
+}
+
+/* 曲名过长时来回滚动（滚动距离由 JS 测量后写入 --marquee-shift） */
+.mp-title-text {
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.mp-title-text.is-marquee {
+    animation-name: mpMarquee;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes mpMarquee {
+    0%, 12% {
+        transform: translateX(0);
+    }
+    46%, 62% {
+        transform: translateX(calc(-1 * var(--marquee-shift, 0px)));
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mp-title-text.is-marquee {
+        animation: none;
+    }
 }
 
 /* 歌曲列表 */
