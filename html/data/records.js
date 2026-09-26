@@ -8,7 +8,6 @@ const recordData = [
             '主页施工大致完成。',
   
         ],
-        images: ['', '']
     },
     {
         date: '2026.09.26',
