@@ -62,7 +62,10 @@ function initMusicPlayer() {
     wrap.className = 'mini-player';
     wrap.innerHTML = `
         <button class="mp-btn mp-prev" id="mpPrev" aria-label="上一首" type="button">&#9198;</button>
-        <button class="mp-btn mp-play" id="mpPlay" aria-label="播放/暂停" type="button">&#9654;</button>
+        <button class="mp-btn mp-play" id="mpPlay" aria-label="播放/暂停" type="button">
+            <span class="icon icon-play">&#9654;</span>
+            <span class="icon icon-pause">&#10073;&#10073;</span>
+        </button>
         <button class="mp-btn mp-next" id="mpNext" aria-label="下一首" type="button">&#9197;</button>
         <div class="mp-info">
             <button class="mp-title" id="mpTitle" type="button" title="点击选择歌曲"></button>
@@ -294,11 +297,14 @@ function initMusicPlayer() {
         progEl.style.width = (audio.currentTime / audio.duration * 100) + '%';
     });
     audio.addEventListener('play', () => {
-        playBtn.innerHTML = '&#10073;&#10073;'; // 暂停图标
+        playBtn.classList.add('is-playing'); // 切换到暂停图标
         startVisual();
     });
     audio.addEventListener('ended', () => { stopVisual(); loadTrack(index + 1); play(); });
-    audio.addEventListener('pause', () => { playBtn.innerHTML = '&#9654;'; stopVisual(); });
+    audio.addEventListener('pause', () => {
+        playBtn.classList.remove('is-playing'); // 切回播放图标
+        stopVisual();
+    });
 
     // 点击进度条跳转
     barEl.addEventListener('click', (e) => {
