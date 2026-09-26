@@ -70,7 +70,7 @@ function initMusicPlayer() {
         </button>
         <button class="mp-btn mp-next" id="mpNext" aria-label="下一首" type="button">&#9197;</button>
         <div class="mp-info">
-            <button class="mp-title" id="mpTitle" type="button" title="点击选择歌曲"></button>
+            <button class="mp-title" id="mpTitle" type="button"></button>
             <div class="mp-bar" id="mpBar"><span id="mpProgress"></span></div>
         </div>
         <div class="mp-list" id="mpList"></div>

@@ -215,7 +215,8 @@ body::before {
     line-height: 1;
     color: var(--text);
     box-shadow: var(--shadow);
-    transition: background 0.25s, box-shadow 0.25s, color 0.25s;
+    /* filter 必须参与过渡，否则夜间模式移出时会闪出未压暗的日间色 */
+    transition: background 0.25s, box-shadow 0.25s, color 0.25s, filter 0.25s;
     position: relative;
     z-index: 110;
     display: flex;
@@ -274,7 +275,8 @@ body::before {
     line-height: 1;
     color: var(--text);
     box-shadow: var(--shadow);
-    transition: background 0.25s, box-shadow 0.25s, opacity 0.25s, color 0.25s;
+    /* filter 必须参与过渡，否则夜间模式移出时会闪出未压暗的日间色 */
+    transition: background 0.25s, box-shadow 0.25s, opacity 0.25s, color 0.25s, filter 0.25s;
     position: relative;
     z-index: 110;
     display: flex;
