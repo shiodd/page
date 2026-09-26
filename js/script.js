@@ -40,6 +40,100 @@ function playSfx(audio) {
     if (!sfxEnabled) return;
     audio.currentTime = 0;
     audio.play().catch(() => {});
+    // 只有真正的点击音才扩散波纹，悬停音不触发，避免过于晃动
+    if (audio === sfxClick) rippleSfxBtn();
+}
+
+// 让音效按钮扩散一圈波纹（重新触发需先移除类并强制重排）
+// 动画结束后移除类，这样音乐播放时的循环波纹能继续
+function rippleSfxBtn() {
+    const btn = document.getElementById('sfxToggle');
+    if (!btn) return;
+    btn.classList.remove('is-playing');
+    void btn.offsetWidth;
+    btn.classList.add('is-playing');
+    clearTimeout(btn._rippleTimer);
+    btn._rippleTimer = setTimeout(() => btn.classList.remove('is-playing'), 900);
+}
+
+// ========== 迷你播放列表 ==========
+const MUSIC_BASE = /\/html\//.test(window.location.pathname) ? '../sound/music/' : 'sound/music/';
+const MUSIC_LIST = [
+    { title: '秋山裕和,むにょっ - ★サティジムノペディ', file: '秋山裕和,むにょっ - ★サティジムノペディ.mp3' },
+    // 新增歌曲：往这里加一行 { title: '显示名', file: '文件名.mp3' }
+];
+
+function initMusicPlayer() {
+    if (!MUSIC_LIST.length) return;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'mini-player';
+    wrap.innerHTML = `
+        <button class="mp-btn" id="mpPrev" aria-label="上一首" type="button">&#9198;</button>
+        <button class="mp-btn mp-play" id="mpPlay" aria-label="播放/暂停" type="button">&#9654;</button>
+        <button class="mp-btn" id="mpNext" aria-label="下一首" type="button">&#9197;</button>
+        <div class="mp-info">
+            <div class="mp-title" id="mpTitle"></div>
+            <div class="mp-bar" id="mpBar"><span id="mpProgress"></span></div>
+        </div>
+    `;
+    document.body.appendChild(wrap);
+
+    const audio = new Audio();
+    audio.preload = 'metadata';
+
+    const playBtn = wrap.querySelector('#mpPlay');
+    const titleEl = wrap.querySelector('#mpTitle');
+    const barEl = wrap.querySelector('#mpBar');
+    const progEl = wrap.querySelector('#mpProgress');
+    let index = 0;
+
+    // 播放时在音效按钮上持续扩散波纹，作为“正在出声”的视觉反馈
+    function setMusicVisual(on) {
+        const btn = document.getElementById('sfxToggle');
+        if (btn) btn.classList.toggle('is-music', on);
+    }
+
+    function loadTrack(i) {
+        index = (i + MUSIC_LIST.length) % MUSIC_LIST.length;
+        const t = MUSIC_LIST[index];
+        audio.src = encodeURI(MUSIC_BASE + t.file);
+        titleEl.textContent = t.title;
+        progEl.style.width = '0%';
+    }
+
+    // 用 play / pause 事件驱动 UI，比依赖 play() 的 promise 更可靠
+    function play() {
+        audio.play().catch(() => {});
+    }
+
+    function pause() {
+        audio.pause();
+    }
+
+    playBtn.addEventListener('click', () => { audio.paused ? play() : pause(); });
+    wrap.querySelector('#mpPrev').addEventListener('click', () => { loadTrack(index - 1); play(); });
+    wrap.querySelector('#mpNext').addEventListener('click', () => { loadTrack(index + 1); play(); });
+
+    audio.addEventListener('timeupdate', () => {
+        if (!audio.duration) return;
+        progEl.style.width = (audio.currentTime / audio.duration * 100) + '%';
+    });
+    audio.addEventListener('play', () => {
+        playBtn.innerHTML = '&#10073;&#10073;'; // 暂停图标
+        setMusicVisual(true);
+    });
+    audio.addEventListener('ended', () => { loadTrack(index + 1); play(); });
+    audio.addEventListener('pause', () => { playBtn.innerHTML = '&#9654;'; setMusicVisual(false); });
+
+    // 点击进度条跳转
+    barEl.addEventListener('click', (e) => {
+        if (!audio.duration) return;
+        const r = barEl.getBoundingClientRect();
+        audio.currentTime = ((e.clientX - r.left) / r.width) * audio.duration;
+    });
+
+    loadTrack(0);
 }
 
 // 各页面对应的色条配置
@@ -72,6 +166,9 @@ function injectNav() {
             <span class="icon icon-sun">${ICON_SUN}</span>
         </button>
         <button class="sfx-toggle-btn" id="sfxToggle" aria-label="音效开关" aria-pressed="false">
+            <span class="wave wave-1"></span>
+            <span class="wave wave-2"></span>
+            <span class="wave wave-3"></span>
             <span class="icon icon-sound-on">${ICON_SOUND_ON}</span>
             <span class="icon icon-sound-off">${ICON_SOUND_OFF}</span>
         </button>
@@ -356,6 +453,7 @@ function initMobileNotice() {
 window.addEventListener('load', () => {
     injectNav();
     initNav();
+    initMusicPlayer();
     initTheme();
     bindCardFlip();
     initClickBars();
