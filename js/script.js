@@ -13,6 +13,10 @@ const NAV_COLORS = ['#c59fda', '#006AB6', '#D162CB', '#ffbad6', '#F3983B'];
 const ICON_MOON = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
 const ICON_SUN = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
 
+// 音效图标（开 / 关）
+const ICON_SOUND_ON = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';
+const ICON_SOUND_OFF = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
+
 // ========== 音效 ==========
 const SFX_BASE = /\/html\//.test(window.location.pathname) ? '../sound/sfx/' : 'sound/sfx/';
 const sfxClick = new Audio(SFX_BASE + 'click.mp3');
@@ -23,7 +27,17 @@ const sfxSelect = new Audio(SFX_BASE + 'select.mp3');
     a.load();
 });
 
+// 音效开关：从未设置过时默认静音（尊重首次访客），用户选择后被记住
+const SFX_KEY = 'sfx';
+let sfxEnabled = (function () {
+    try {
+        const v = localStorage.getItem(SFX_KEY);
+        return v === null ? false : v === '1';
+    } catch (e) { return false; }
+})();
+
 function playSfx(audio) {
+    if (!sfxEnabled) return;
     audio.currentTime = 0;
     audio.play().catch(() => {});
 }
@@ -56,6 +70,10 @@ function injectNav() {
         <button class="theme-toggle-btn" id="themeToggle" aria-label="切换主题">
             <span class="icon icon-moon">${ICON_MOON}</span>
             <span class="icon icon-sun">${ICON_SUN}</span>
+        </button>
+        <button class="sfx-toggle-btn" id="sfxToggle" aria-label="音效开关" aria-pressed="false">
+            <span class="icon icon-sound-on">${ICON_SOUND_ON}</span>
+            <span class="icon icon-sound-off">${ICON_SOUND_OFF}</span>
         </button>
         <button class="nav-toggle" id="navToggle" aria-label="菜单">
             <span></span><span></span><span></span>
@@ -254,6 +272,22 @@ function initNav() {
             document.body.classList.remove('theme-switch');
             void document.body.offsetWidth;
             document.body.classList.add('theme-switch');
+        });
+    }
+
+    // 音效开关（同样必须在 forEach 外，只绑定一次）
+    const sfxBtn = document.getElementById('sfxToggle');
+    if (sfxBtn) {
+        const syncSfxBtn = () => {
+            sfxBtn.classList.toggle('is-on', sfxEnabled);
+            sfxBtn.setAttribute('aria-pressed', sfxEnabled ? 'true' : 'false');
+        };
+        syncSfxBtn();
+        sfxBtn.addEventListener('click', () => {
+            sfxEnabled = !sfxEnabled;
+            try { localStorage.setItem(SFX_KEY, sfxEnabled ? '1' : '0'); } catch (e) {}
+            syncSfxBtn();
+            if (sfxEnabled) playSfx(sfxClick); // 开启时给一声反馈
         });
     }
 }
