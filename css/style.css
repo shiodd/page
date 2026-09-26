@@ -215,7 +215,7 @@ body::before {
     line-height: 1;
     color: var(--text);
     box-shadow: var(--shadow);
-    transition: background 0.25s, box-shadow 0.25s;
+    transition: background 0.25s, box-shadow 0.25s, color 0.25s;
     position: relative;
     z-index: 110;
     display: flex;
@@ -224,8 +224,10 @@ body::before {
     padding: 0;
 }
 
+/* hover 激活：填充当前页面主题色 + 图标变白，与导航按钮一致 */
 .theme-toggle-btn:hover {
-    background: var(--surface-strong);
+    background: var(--btn-color, #c59fda);
+    color: #fff;
     box-shadow: var(--shadow);
 }
 
@@ -272,7 +274,7 @@ body::before {
     line-height: 1;
     color: var(--text);
     box-shadow: var(--shadow);
-    transition: background 0.25s, box-shadow 0.25s, opacity 0.25s;
+    transition: background 0.25s, box-shadow 0.25s, opacity 0.25s, color 0.25s;
     position: relative;
     z-index: 110;
     display: flex;
@@ -281,9 +283,16 @@ body::before {
     padding: 0;
 }
 
+/* hover 激活：填充当前页面主题色 + 图标变白，与导航按钮一致 */
 .sfx-toggle-btn:hover {
-    background: var(--surface-strong);
+    background: var(--btn-color, #c59fda);
+    color: #fff;
     box-shadow: var(--shadow);
+}
+
+[data-theme="dark"] .theme-toggle-btn:hover,
+[data-theme="dark"] .sfx-toggle-btn:hover {
+    filter: brightness(0.75) saturate(0.9);
 }
 
 /* 静音时整体变淡，开启时恢复 */
@@ -446,14 +455,9 @@ body::before {
     transition: all 0.2s ease; /* 与导航栏按钮一致 */
 }
 
-/* 曲名按钮同样与导航栏一致：hover 填充主题色 + 白字 */
+/* 曲名是文字而非按钮，hover 只轻微提亮，不做填色 */
 .mp-title:hover {
-    background: var(--btn-color, #c59fda);
-    color: #fff;
-}
-
-[data-theme="dark"] .mp-title:hover {
-    filter: brightness(0.75) saturate(0.9);
+    color: var(--text-strong);
 }
 
 /* 曲名过长时来回滚动（滚动距离由 JS 测量后写入 --marquee-shift） */
@@ -538,6 +542,11 @@ body::before {
 
 [data-theme="dark"] .mp-item.is-current {
     filter: brightness(0.75) saturate(0.9);
+}
+
+/* 当前曲目 hover 时背景也是主题色，必须强制白字，否则歌名看不见 */
+.mp-item.is-current:hover {
+    color: #fff;
 }
 
 /* 只有一首歌时隐藏上/下一首 */

@@ -105,6 +105,7 @@ function initMusicPlayer() {
 
     let audioCtx = null, analyser = null, freqData = null;
     let rafId = null, phase = 0, energy = 0, targetEnergy = 0;
+    let settleProgress = -1; // >=0 表示正在播放“暂停落水”动画（0→1 进度）
 
     // 接入 Web Audio 读取真实频谱（一个 audio 元素只能创建一次 source）
     function ensureAudioGraph() {
@@ -204,7 +205,41 @@ function initMusicPlayer() {
         return `rgba(${r},${g},${b},${alpha})`;
     }
 
+    // 暂停时让水波整块下沉滑出，避免“啪”地一下消失
+    function fadeSettle() {
+        const w = wrap.clientWidth || 180;
+        wctx.clearRect(0, 0, w, WAVE_H);
+
+        if (settleProgress < 1) {
+            const p = settleProgress;
+            const sink = p * p * (WAVE_H + 6); // 加速下落，像水沉下去
+            const fade = 1 - p;
+            const cfg = getCurrentPage();
+            const base = (cfg && cfg.color) || '#c59fda';
+            phase += 0.02;
+            wctx.save();
+            wctx.translate(0, sink);           // 整块水面下移，滑出播放条
+            fillSpecWave(w, phase, themeRgba(base, 0.55 * fade), 4, 1);
+            fillSpecWave(w, phase * 1.4 + 1.9, themeRgba(base, 0.26 * fade), 2, 0.62);
+            wctx.restore();
+            rafId = requestAnimationFrame(drawFrame);
+        } else {
+            settleProgress = -1;
+            rafId = null;
+            spec.fill(0);
+            wctx.clearRect(0, 0, w, WAVE_H);
+        }
+    }
+
     function drawFrame() {
+        // 暂停后的落水动画：水面整块下沉滑出、波幅平息、逐渐透明，最后清空
+        if (settleProgress >= 0) {
+            settleProgress += 0.035;                            // 约 0.5s 落完
+            for (let i = 0; i < WAVE_BINS; i++) spec[i] *= 0.88; // 波幅迅速平息
+            fadeSettle();
+            return;
+        }
+
         sampleSpectrum();
 
         // 空间平滑（去毛刺）+ 时间平滑（去抖动）
@@ -236,15 +271,21 @@ function initMusicPlayer() {
         ensureAudioGraph();
         if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
         if (rafId) cancelAnimationFrame(rafId);
+        settleProgress = -1; // 取消可能正在进行的落水动画
         drawFrame();
     }
 
     function stopVisual() {
-        if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+        // 正在动：交给 drawFrame 播放落水动画，结束后自行停止
+        if (rafId && settleProgress < 0) {
+            settleProgress = 0;
+            return;
+        }
+        // 本来就没在动：直接归静
         energy = 0;
         targetEnergy = 0;
-        spec.fill(0); // 暂停后重新播放时波形从静止开始
-        wctx.clearRect(0, 0, wrap.clientWidth || 180, WAVE_H); // 暂停时水面归静
+        spec.fill(0);
+        wctx.clearRect(0, 0, wrap.clientWidth || 180, WAVE_H);
     }
 
     window.addEventListener('resize', () => { if (rafId) resizeWave(); });
@@ -442,6 +483,9 @@ function injectNav() {
     const nav = document.createElement('nav');
     nav.className = 'top-nav';
     nav.id = 'topNav';
+    // 主题/音效按钮 hover 用的强调色：当前页面主题色
+    const navCfg = getCurrentPage();
+    nav.style.setProperty('--btn-color', (navCfg && navCfg.color) || '#c59fda');
     nav.innerHTML = `
         <button class="theme-toggle-btn" id="themeToggle" aria-label="切换主题">
             <span class="icon icon-moon">${ICON_MOON}</span>
