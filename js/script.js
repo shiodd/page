@@ -238,23 +238,24 @@ function initNav() {
                 goPage(url);
             }
         });
-
-        const themeBtn = document.getElementById('themeToggle');
-        if (themeBtn) {
-            themeBtn.addEventListener('click', () => {
-                playSfx(sfxClick);
-                const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-                applyTheme(next);
-                const cfg = getCurrentPage();
-                if (cfg) {
-                    showArrowBlock(cfg.color, cfg.type, cfg.left);
-                }
-                document.body.classList.remove('theme-switch');
-                void document.body.offsetWidth;
-                document.body.classList.add('theme-switch');
-            });
-        }
     });
+
+    // 主题切换按钮：必须放在 forEach 外，否则每个导航按钮都会挂一次监听
+    const themeBtn = document.getElementById('themeToggle');
+    if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+            playSfx(sfxClick);
+            const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+            applyTheme(next);
+            const cfg = getCurrentPage();
+            if (cfg) {
+                showArrowBlock(cfg.color, cfg.type, cfg.left);
+            }
+            document.body.classList.remove('theme-switch');
+            void document.body.offsetWidth;
+            document.body.classList.add('theme-switch');
+        });
+    }
 }
 
 function setThemeAttr(theme) {
