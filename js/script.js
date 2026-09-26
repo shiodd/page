@@ -48,6 +48,8 @@ const MUSIC_BASE = /\/html\//.test(window.location.pathname) ? '../sound/music/'
 const MUSIC_LIST = [
     { title: '秋山裕和,むにょっ - ★サティジムノペディ', file: '秋山裕和,むにょっ - ★サティジムノペディ.mp3' },
     { title: 'Elements Garden - ハッピートゥモロー (Title Version)', file: 'Elements Garden - ハッピートゥモロー (Title Version).mp3' },
+    { title: '上松範康(Elements Garden) - スカーレット', file: '上松範康(Elements Garden) - スカーレット.mp3' },
+    { title: '水月陵 - 恋×シンアイ彼女 メインテーマ', file: '水月陵 - 恋×シンアイ彼女 メインテーマ.mp3' },
     // 新增歌曲也可以往这里加一行 { title: '显示名', file: '文件名.mp3' }
 ];
 
@@ -75,6 +77,10 @@ function initMusicPlayer() {
     `;
     // 只有一首歌时隐藏上/下一首（避免点了没反应），换歌用列表
     if (MUSIC_LIST.length < 2) wrap.classList.add('is-single');
+
+    // hover 用的强调色：与导航栏按钮一样取当前页面主题色
+    const pageCfg = getCurrentPage();
+    wrap.style.setProperty('--btn-color', (pageCfg && pageCfg.color) || '#c59fda');
     // 放在顶部导航按钮组的最左边
     const nav = document.getElementById('topNav');
     if (nav) nav.insertBefore(wrap, nav.firstChild);

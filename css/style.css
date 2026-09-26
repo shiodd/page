@@ -374,8 +374,14 @@ body::before {
     transition: color 0.2s ease;
 }
 
+/* hover 与导航栏按钮一致：填充主题色 + 白色图标 */
 .mp-btn:hover {
-    color: var(--text-strong);
+    background: var(--btn-color, #c59fda);
+    color: #fff;
+}
+
+[data-theme="dark"] .mp-btn:hover {
+    filter: brightness(0.75) saturate(0.9);
 }
 
 /* 播放/暂停：固定宽度，切换图标时不会把曲名挤动 */
@@ -473,27 +479,30 @@ body::before {
     }
 }
 
-/* 歌曲列表 */
+/* 歌曲列表：与导航栏下拉相同的展开动画（max-height 过渡） */
 .mp-list {
     position: absolute;
     top: calc(100% + 6px);
     left: 0;
     min-width: 180px;
     max-width: 240px;
-    background: var(--surface-strong);
-    box-shadow: var(--shadow);
-    z-index: 2;
-    display: none;
+    display: flex;
     flex-direction: column;
+    background: transparent;
+    box-shadow: var(--shadow-lg);
+    z-index: 2;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
 }
 
 .mp-list.open {
-    display: flex;
+    max-height: 300px;
 }
 
 .mp-item {
     border: none;
-    background: none;
+    background: var(--surface-strong);
     padding: 0.4rem 0.6rem;
     font-family: inherit;
     font-size: 0.72rem;
@@ -503,18 +512,25 @@ body::before {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: all 0.2s ease;
 }
 
+/* hover 填充当前页面主题色，与导航栏按钮一致 */
 .mp-item:hover {
-    background: var(--surface);
+    background: var(--btn-color, #c59fda);
+    color: #fff;
+}
+
+[data-theme="dark"] .mp-item:hover {
+    filter: brightness(0.75) saturate(0.9);
 }
 
 .mp-item.is-current {
-    color: #c59fda;
+    color: var(--btn-color, #c59fda);
 }
 
 [data-theme="dark"] .mp-item.is-current {
-    color: #a98bc0;
+    filter: brightness(0.75) saturate(0.9);
 }
 
 /* 只有一首歌时隐藏上/下一首 */
