@@ -237,6 +237,9 @@
         // 数据来自 data/records.js，这里只负责渲染
         const list = document.getElementById('recordList');
 
+        // 按日期从新到旧排序，越新的越在上方
+        recordData.sort((a, b) => b.date.localeCompare(a.date));
+
         const lightbox = document.getElementById('lightbox');
         const lightboxImg = lightbox.querySelector('img');
         const zoomInBtn = document.getElementById('zoomIn');

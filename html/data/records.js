@@ -10,4 +10,12 @@ const recordData = [
         ],
         images: ['', '']
     },
+    {
+        date: '2026.09.26',
+        title: '关于blender启用MToon材质后物体没有阴影的问题',
+        content: [
+            '关闭在材质中的设置里的透明阴影即可',
+        ],
+        images: ['../image/record/2026092601.png']
+    },
 ];
