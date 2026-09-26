@@ -57,6 +57,25 @@ const MUSIC_LIST = [
 // 接入 Web Audio 会被静音，因此那种情况自动降级为 CSS 波动动画
 const CAN_ANALYSE = window.location.protocol === 'http:' || window.location.protocol === 'https:';
 
+// 播放状态与频谱快照：播放条之外的水波（如首页主区域底部）也共用这份数据
+let musicPlaying = false;
+const HOME_SPEC = new Float32Array(40);
+
+// 把 #rrggbb 转成 rgba；夜间模式按站内 brightness(0.62) 的逻辑压暗
+function themeRgba(hex, alpha) {
+    const h = String(hex || '#c59fda').replace('#', '');
+    const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
+    let r = parseInt(full.slice(0, 2), 16);
+    let g = parseInt(full.slice(2, 4), 16);
+    let b = parseInt(full.slice(4, 6), 16);
+    if (document.documentElement.dataset.theme === 'dark') {
+        r = Math.round(r * 0.62);
+        g = Math.round(g * 0.62);
+        b = Math.round(b * 0.62);
+    }
+    return `rgba(${r},${g},${b},${alpha})`;
+}
+
 function initMusicPlayer() {
     if (!MUSIC_LIST.length) return;
 
@@ -190,21 +209,6 @@ function initMusicPlayer() {
         wctx.fill();
     }
 
-    // 把 #rrggbb 转成 rgba；夜间模式按站内 brightness(0.62) 的逻辑压暗
-    function themeRgba(hex, alpha) {
-        const h = String(hex || '#c59fda').replace('#', '');
-        const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
-        let r = parseInt(full.slice(0, 2), 16);
-        let g = parseInt(full.slice(2, 4), 16);
-        let b = parseInt(full.slice(4, 6), 16);
-        if (document.documentElement.dataset.theme === 'dark') {
-            r = Math.round(r * 0.62);
-            g = Math.round(g * 0.62);
-            b = Math.round(b * 0.62);
-        }
-        return `rgba(${r},${g},${b},${alpha})`;
-    }
-
     // 暂停时让水波整块下沉滑出，避免“啪”地一下消失
     function fadeSettle() {
         const w = wrap.clientWidth || 180;
@@ -227,6 +231,7 @@ function initMusicPlayer() {
             settleProgress = -1;
             rafId = null;
             spec.fill(0);
+            HOME_SPEC.fill(0);
             wctx.clearRect(0, 0, w, WAVE_H);
         }
     }
@@ -251,6 +256,7 @@ function initMusicPlayer() {
             spec[i] += (smooth - spec[i]) * 0.3;
             sum += spec[i];
         }
+        HOME_SPEC.set(spec); // 供首页水波共用
         const energyNow = sum / WAVE_BINS;
 
         const w = wrap.clientWidth || 180;
@@ -285,6 +291,7 @@ function initMusicPlayer() {
         energy = 0;
         targetEnergy = 0;
         spec.fill(0);
+        HOME_SPEC.fill(0);
         wctx.clearRect(0, 0, wrap.clientWidth || 180, WAVE_H);
     }
 
@@ -346,11 +353,13 @@ function initMusicPlayer() {
     });
     audio.addEventListener('play', () => {
         playBtn.classList.add('is-playing'); // 切换到暂停图标
+        musicPlaying = true;
         startVisual();
     });
     audio.addEventListener('ended', () => { stopVisual(); loadTrack(index + 1); play(); });
     audio.addEventListener('pause', () => {
         playBtn.classList.remove('is-playing'); // 切回播放图标
+        musicPlaying = false;
         stopVisual();
     });
 
@@ -777,6 +786,7 @@ window.addEventListener('load', () => {
     injectNav();
     initNav();
     initMusicPlayer();
+    initHomeWave();
     initTheme();
     bindCardFlip();
     initClickBars();
@@ -856,6 +866,7 @@ function startAutoClickBars() {
 }
 
 function spawnAutoBar() {
+    if (musicPlaying) return; // 播放音乐时暂停自动色条，避免画面太乱
     const host = document.querySelector('.content-side') || document.body;
     const rect = host.getBoundingClientRect();
     const ab = document.querySelector('.arrow-block');
@@ -868,4 +879,76 @@ function spawnAutoBar() {
     }
     const y = Math.random() * window.innerHeight;
     spawnClickBar(x, y);
+}
+
+// ========== 首页主区域底部的水波 ==========
+// 与播放条共用频谱：播放时随音乐起伏，没放音乐时也有轻微荡漾
+function initHomeWave() {
+    const host = document.querySelector('.content-side');
+    if (!host) return; // 只有首页有这个容器
+
+    const H = 22;
+    const canvas = document.createElement('canvas');
+    canvas.className = 'home-wave';
+    host.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+
+    let phase = 0, raf = null;
+
+    function resize() {
+        const dpr = window.devicePixelRatio || 1;
+        const w = host.clientWidth || 300;
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(H * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function waveAt(t) {
+        const pos = t * (HOME_SPEC.length - 1);
+        const i0 = Math.floor(pos);
+        const i1 = Math.min(HOME_SPEC.length - 1, i0 + 1);
+        const f = pos - i0;
+        return HOME_SPEC[i0] * (1 - f) + HOME_SPEC[i1] * f;
+    }
+
+    function fill(ph, color, lift, scale) {
+        const w = host.clientWidth || 300;
+        const baseY = H - lift;
+        ctx.beginPath();
+        ctx.moveTo(0, H);
+        for (let x = 0; x <= w; x += 3) {
+            const t = x / w;
+            // 播放时由频谱塑形；无音乐时保留一点底噪，水面仍有微澜
+            const bump = Math.max(waveAt(t), 0.10) * 16 * scale;
+            const ripple = Math.sin(t * Math.PI * 3 + ph) * 1.4;
+            ctx.lineTo(x, baseY - bump + ripple);
+        }
+        ctx.lineTo(w, H);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
+    function draw() {
+        const w = host.clientWidth || 300;
+        ctx.clearRect(0, 0, w, H);
+        phase += 0.025;
+        const cfg = getCurrentPage();
+        const base = (cfg && cfg.color) || '#c59fda';
+        fill(phase, themeRgba(base, 0.32), 5, 1);
+        fill(phase * 1.4 + 1.9, themeRgba(base, 0.16), 2, 0.6);
+        raf = requestAnimationFrame(draw);
+    }
+
+    function start() { if (!raf) { resize(); draw(); } }
+    function stop() { if (raf) { cancelAnimationFrame(raf); raf = null; } }
+
+    resize();
+    start();
+    window.addEventListener('resize', resize);
+    // 标签页不可见时停止绘制，省电
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) stop();
+        else start();
+    });
 }
