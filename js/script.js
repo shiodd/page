@@ -97,7 +97,7 @@ function initMusicPlayer() {
     let tracks = MUSIC_LIST.slice(); // 实际使用的列表，自动检测成功后会被替换
 
     // 播放条内的水波：波幅随音乐能量起伏（取不到频谱时也有轻微荡漾）
-    const WAVE_H = 15;
+    const WAVE_H = 18;
     const waveCanvas = document.createElement('canvas');
     waveCanvas.className = 'mp-wave';
     wrap.appendChild(waveCanvas);
@@ -178,8 +178,9 @@ function initMusicPlayer() {
         wctx.moveTo(0, WAVE_H);
         for (let x = 0; x <= w; x += 2) {
             const t = x / w;
-            const bump = specAt(t) * 10 * scale;                // 频谱决定起伏高低
-            const ripple = Math.sin(t * Math.PI * 4 + ph) * 1.1; // 水的行进感
+            // 频谱决定起伏高低；pow<1 会抬高弱信号，避免安静段“看不出动静”
+            const bump = Math.pow(specAt(t), 0.75) * 14 * scale;
+            const ripple = Math.sin(t * Math.PI * 4 + ph) * 1.2; // 水的行进感
             wctx.lineTo(x, baseY - bump + ripple);
         }
         wctx.lineTo(w, WAVE_H);
