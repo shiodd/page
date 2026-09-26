@@ -44,9 +44,11 @@ function playSfx(audio) {
 
 // ========== 迷你播放列表 ==========
 const MUSIC_BASE = /\/html\//.test(window.location.pathname) ? '../sound/music/' : 'sound/music/';
+// 兜底列表：自动检测失败时使用（file:// 打开、或服务器未开启目录列表）
 const MUSIC_LIST = [
     { title: '秋山裕和,むにょっ - ★サティジムノペディ', file: '秋山裕和,むにょっ - ★サティジムノペディ.mp3' },
-    // 新增歌曲：往这里加一行 { title: '显示名', file: '文件名.mp3' }
+    { title: 'Elements Garden - ハッピートゥモロー (Title Version)', file: 'Elements Garden - ハッピートゥモロー (Title Version).mp3' },
+    // 新增歌曲也可以往这里加一行 { title: '显示名', file: '文件名.mp3' }
 ];
 
 // 实时频谱只在 http(s) 下启用：file:// 下媒体被视为跨域，
@@ -83,6 +85,7 @@ function initMusicPlayer() {
     const barEl = wrap.querySelector('#mpBar');
     const progEl = wrap.querySelector('#mpProgress');
     let index = 0;
+    let tracks = MUSIC_LIST.slice(); // 实际使用的列表，自动检测成功后会被替换
 
     // 播放条内的水波：波幅随音乐能量起伏（取不到频谱时也有轻微荡漾）
     const WAVE_H = 15;
@@ -194,8 +197,8 @@ function initMusicPlayer() {
     window.addEventListener('resize', () => { if (rafId) resizeWave(); });
 
     function loadTrack(i) {
-        index = (i + MUSIC_LIST.length) % MUSIC_LIST.length;
-        const t = MUSIC_LIST[index];
+        index = (i + tracks.length) % tracks.length;
+        const t = tracks[index];
         audio.src = encodeURI(MUSIC_BASE + t.file);
         titleEl.textContent = t.title;
         progEl.style.width = '0%';
@@ -237,7 +240,7 @@ function initMusicPlayer() {
     const listEl = wrap.querySelector('#mpList');
 
     function renderList() {
-        listEl.innerHTML = MUSIC_LIST.map((t, i) =>
+        listEl.innerHTML = tracks.map((t, i) =>
             `<button class="mp-item${i === index ? ' is-current' : ''}" type="button" data-i="${i}">${t.title}</button>`
         ).join('');
         listEl.querySelectorAll('.mp-item').forEach(btn => {
@@ -304,7 +307,31 @@ function initMusicPlayer() {
         }
     }
 
-    restore();
+    // 自动检测：服务器开启目录列表时（如 python -m http.server）解析出所有音频，
+    // 这样往文件夹里丢歌就会自动出现；取不到（file:// 或未开列表）则沿用 MUSIC_LIST
+    function discoverTracks() {
+        const audioExt = /\.(mp3|m4a|ogg|wav|flac)$/i;
+        return fetch(MUSIC_BASE)
+            .then(r => (r.ok ? r.text() : Promise.reject(new Error('no listing'))))
+            .then(html => {
+                const doc = new DOMParser().parseFromString(html, 'text/html');
+                const found = [];
+                doc.querySelectorAll('a[href]').forEach(a => {
+                    const name = decodeURIComponent((a.getAttribute('href') || '').split('/').pop() || '');
+                    if (audioExt.test(name)) {
+                        found.push({ title: name.replace(audioExt, ''), file: name });
+                    }
+                });
+                return found;
+            })
+            .catch(() => []);
+    }
+
+    discoverTracks().then(found => {
+        if (found.length) tracks = found;
+        if (tracks.length >= 2) wrap.classList.remove('is-single');
+        restore();
+    });
 }
 
 // 各页面对应的色条配置
