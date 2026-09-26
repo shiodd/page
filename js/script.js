@@ -5,7 +5,7 @@ const NAV_ITEMS = [
     { label: '关于',   href: 'html/about.html' },
     { label: '记录',   href: 'html/record.html' },
     { label: '名片',   href: 'html/card.html' },
-    { label: '友链', href: 'html/friends.html' },
+    { label: '友链', href: 'html/friends.html', hidden: true }, // 暂时屏蔽，去掉 hidden 即可恢复
 ];
 
 const NAV_COLORS = ['#c59fda', '#006AB6', '#D162CB', '#ffbad6', '#F3983B'];
@@ -61,7 +61,7 @@ function injectNav() {
             <span></span><span></span><span></span>
         </button>
         <div class="nav-dropdown" id="navDropdown">
-            ${NAV_ITEMS.map((item, i) => {
+            ${NAV_ITEMS.filter(item => !item.hidden).map((item, i) => {
                 const attr = item.href
                     ? `data-href="${item.href}"`
                     : `data-target="${item.target}"`;
