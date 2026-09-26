@@ -855,17 +855,6 @@ body::before {
     transition: background 0.3s ease;
 }
 
-/* 主区域底部的水波（canvas 由 JS 绘制） */
-.home-wave {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    height: 22px;
-    z-index: 0; /* 在内容之下 */
-    pointer-events: none;
-}
-
 .home-center {
     position: relative;
     z-index: 1;
