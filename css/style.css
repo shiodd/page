@@ -323,7 +323,6 @@ body::before {
 /* ========== 迷你播放列表（位于顶部导航按钮组最左侧） ========== */
 .mini-player {
     position: relative;
-    overflow: hidden; /* 水波只在条内 */
     display: flex;
     align-items: center;
     gap: 0.45rem;
@@ -333,12 +332,7 @@ body::before {
     backdrop-filter: blur(8px);
     box-shadow: var(--shadow);
     color: var(--text);
-    opacity: 0.55;
-    transition: opacity 0.25s ease;
-}
-
-.mini-player:hover {
-    opacity: 1;
+    opacity: 1; /* 常驻可见，不再淡化 */
 }
 
 /* 播放条内的水波（canvas 由 JS 绘制，波幅随音乐起伏） */
@@ -384,12 +378,75 @@ body::before {
     min-width: 0;
 }
 
+/* 标题同时是“打开歌曲列表”的按钮 */
 .mp-title {
+    display: block;
+    width: 100%;
+    border: none;
+    background: none;
+    padding: 0;
+    font-family: inherit;
     font-size: 0.72rem;
     color: var(--text-soft);
+    text-align: left;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+.mp-title:hover {
+    color: var(--text-strong);
+}
+
+/* 歌曲列表 */
+.mp-list {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 180px;
+    max-width: 240px;
+    background: var(--surface-strong);
+    box-shadow: var(--shadow);
+    z-index: 2;
+    display: none;
+    flex-direction: column;
+}
+
+.mp-list.open {
+    display: flex;
+}
+
+.mp-item {
+    border: none;
+    background: none;
+    padding: 0.4rem 0.6rem;
+    font-family: inherit;
+    font-size: 0.72rem;
+    color: var(--text-soft);
+    text-align: left;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mp-item:hover {
+    background: var(--surface);
+}
+
+.mp-item.is-current {
+    color: #c59fda;
+}
+
+[data-theme="dark"] .mp-item.is-current {
+    color: #a98bc0;
+}
+
+/* 只有一首歌时隐藏上/下一首 */
+.mini-player.is-single .mp-prev,
+.mini-player.is-single .mp-next {
+    display: none;
 }
 
 .mp-bar {

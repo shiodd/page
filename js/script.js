@@ -59,14 +59,17 @@ function initMusicPlayer() {
     const wrap = document.createElement('div');
     wrap.className = 'mini-player';
     wrap.innerHTML = `
-        <button class="mp-btn" id="mpPrev" aria-label="上一首" type="button">&#9198;</button>
+        <button class="mp-btn mp-prev" id="mpPrev" aria-label="上一首" type="button">&#9198;</button>
         <button class="mp-btn mp-play" id="mpPlay" aria-label="播放/暂停" type="button">&#9654;</button>
-        <button class="mp-btn" id="mpNext" aria-label="下一首" type="button">&#9197;</button>
+        <button class="mp-btn mp-next" id="mpNext" aria-label="下一首" type="button">&#9197;</button>
         <div class="mp-info">
-            <div class="mp-title" id="mpTitle"></div>
+            <button class="mp-title" id="mpTitle" type="button" title="点击选择歌曲"></button>
             <div class="mp-bar" id="mpBar"><span id="mpProgress"></span></div>
         </div>
+        <div class="mp-list" id="mpList"></div>
     `;
+    // 只有一首歌时隐藏上/下一首（避免点了没反应），换歌用列表
+    if (MUSIC_LIST.length < 2) wrap.classList.add('is-single');
     // 放在顶部导航按钮组的最左边
     const nav = document.getElementById('topNav');
     if (nav) nav.insertBefore(wrap, nav.firstChild);
@@ -134,6 +137,21 @@ function initMusicPlayer() {
         wctx.fill();
     }
 
+    // 把 #rrggbb 转成 rgba；夜间模式按站内 brightness(0.62) 的逻辑压暗
+    function themeRgba(hex, alpha) {
+        const h = String(hex || '#c59fda').replace('#', '');
+        const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
+        let r = parseInt(full.slice(0, 2), 16);
+        let g = parseInt(full.slice(2, 4), 16);
+        let b = parseInt(full.slice(4, 6), 16);
+        if (document.documentElement.dataset.theme === 'dark') {
+            r = Math.round(r * 0.62);
+            g = Math.round(g * 0.62);
+            b = Math.round(b * 0.62);
+        }
+        return `rgba(${r},${g},${b},${alpha})`;
+    }
+
     function drawFrame() {
         if (analyser && freqData) {
             analyser.getByteFrequencyData(freqData);
@@ -148,9 +166,12 @@ function initMusicPlayer() {
 
         phase += 0.03 + energy * 0.06;   // 声音越大，水流动越快
         const amp = 1.6 + energy * 5.5;  // 静时微澜，响时起伏
-        const dark = document.documentElement.dataset.theme === 'dark';
-        fillWave(w, amp, phase, dark ? 'rgba(122,99,135,0.55)' : 'rgba(197,159,218,0.55)', 3);
-        fillWave(w, amp * 0.7, phase * 1.5 + 1.7, dark ? 'rgba(122,99,135,0.28)' : 'rgba(197,159,218,0.28)', 1);
+
+        // 水波颜色跟随当前页面的主题色
+        const cfg = getCurrentPage();
+        const base = (cfg && cfg.color) || '#c59fda';
+        fillWave(w, amp, phase, themeRgba(base, 0.55), 3);
+        fillWave(w, amp * 0.7, phase * 1.5 + 1.7, themeRgba(base, 0.28), 1);
 
         rafId = requestAnimationFrame(drawFrame);
     }
@@ -178,6 +199,7 @@ function initMusicPlayer() {
         audio.src = encodeURI(MUSIC_BASE + t.file);
         titleEl.textContent = t.title;
         progEl.style.width = '0%';
+        renderList();
     }
 
     // 用 play / pause 事件驱动 UI，比依赖 play() 的 promise 更可靠
@@ -211,7 +233,78 @@ function initMusicPlayer() {
         audio.currentTime = ((e.clientX - r.left) / r.width) * audio.duration;
     });
 
-    loadTrack(0);
+    // ---- 歌曲列表：点标题展开 ----
+    const listEl = wrap.querySelector('#mpList');
+
+    function renderList() {
+        listEl.innerHTML = MUSIC_LIST.map((t, i) =>
+            `<button class="mp-item${i === index ? ' is-current' : ''}" type="button" data-i="${i}">${t.title}</button>`
+        ).join('');
+        listEl.querySelectorAll('.mp-item').forEach(btn => {
+            btn.addEventListener('click', () => {
+                loadTrack(Number(btn.dataset.i));
+                play();
+                listEl.classList.remove('open');
+            });
+        });
+    }
+
+    titleEl.addEventListener('click', () => listEl.classList.toggle('open'));
+    document.addEventListener('click', (e) => {
+        if (!wrap.contains(e.target)) listEl.classList.remove('open');
+    });
+
+    // ---- 跨页面续播 ----
+    // 换页是整页刷新，音频对象会被销毁，所以把进度存进 sessionStorage，
+    // 新页面再据此恢复到原来的位置继续播
+    const STORE_KEY = 'musicState';
+
+    function saveState() {
+        try {
+            sessionStorage.setItem(STORE_KEY, JSON.stringify({
+                index: index,
+                time: audio.currentTime,
+                playing: !audio.paused
+            }));
+        } catch (e) {}
+    }
+
+    window.addEventListener('pagehide', saveState);
+    window.addEventListener('beforeunload', saveState);
+    audio.addEventListener('pause', saveState);
+    audio.addEventListener('play', saveState);
+    audio.addEventListener('timeupdate', () => {
+        // 每约 5 秒记一次进度，防止 pagehide 没触发
+        if (!audio.duration) return;
+        if (!saveState._last || Date.now() - saveState._last > 5000) {
+            saveState._last = Date.now();
+            saveState();
+        }
+    });
+
+    function restore() {
+        let s = null;
+        try { s = JSON.parse(sessionStorage.getItem(STORE_KEY) || 'null'); } catch (e) {}
+        loadTrack(s && typeof s.index === 'number' ? s.index : 0);
+        if (!s) return;
+
+        if (s.time > 0) {
+            const seek = () => { try { audio.currentTime = s.time; } catch (e) {} };
+            if (audio.readyState >= 1) seek();
+            else audio.addEventListener('loadedmetadata', seek, { once: true });
+        }
+
+        if (s.playing) {
+            // 自动续播可能被浏览器的自动播放策略拦截；
+            // 被拦时改为“用户首次点击页面任意处再接着播”
+            audio.play().catch(() => {
+                const resume = () => audio.play().catch(() => {});
+                document.addEventListener('click', resume, { once: true });
+            });
+        }
+    }
+
+    restore();
 }
 
 // 各页面对应的色条配置
