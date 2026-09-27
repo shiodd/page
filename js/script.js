@@ -813,6 +813,10 @@ window.addEventListener('load', () => {
 // 说明：file:// 下浏览器禁止 fetch，会自动退回整页跳转（配合已有的续播逻辑）
 const PJAX_ENABLED = window.location.protocol === 'http:' || window.location.protocol === 'https:';
 
+// 已加载过的外部脚本（如 data/records.js）：重复加载会因 const 重复声明报错，
+// 而它定义的全局数据（recordData 等）本来就在，跳过即可
+const loadedScripts = new Set();
+
 function absoluteUrl(rel, base) {
     try { return new URL(rel, base).href; } catch (e) { return rel; }
 }
@@ -831,7 +835,9 @@ function runInlineScript(code) {
     if (!code || !code.trim()) return;
     try {
         const s = document.createElement('script');
-        s.textContent = code;
+        // 包一层 IIFE：让脚本里的顶层 const/let 成为局部绑定，
+        // 否则 PJAX 第二次执行同一段脚本会报 “Identifier 'xxx' has already been declared”
+        s.textContent = '(function(){\n' + code + '\n})();';
         document.head.appendChild(s);
     } catch (e) {}
 }
@@ -891,7 +897,10 @@ async function pjaxNavigate(url, isPop) {
         const src = s.getAttribute('src');
         if (src) {
             if (/js\/script\.js$/.test(src)) continue;
-            await loadScript(absoluteUrl(src, target));
+            const abs = absoluteUrl(src, target);
+            if (loadedScripts.has(abs)) continue; // 已加载过，全局数据仍在
+            loadedScripts.add(abs);
+            await loadScript(abs);
         } else {
             runInlineScript(s.textContent);
         }
