@@ -564,15 +564,18 @@ body::before {
     cursor: pointer;
 }
 
+/* 进度条跟随当前页面主题色（--btn-color 由 JS 按页面设置，如首页紫、关于蓝…） */
 .mp-bar span {
     display: block;
     height: 100%;
     width: 0;
-    background: #c59fda;
+    background: var(--btn-color, #c59fda);
 }
 
+/* 夜间模式按站内统一的 0.62 压暗逻辑对主题色压暗，而不是写死紫色 */
 [data-theme="dark"] .mp-bar span {
-    background: #7a6387;
+    background: var(--btn-color, #c59fda);
+    background: color-mix(in srgb, var(--btn-color, #c59fda) 62%, #000);
 }
 
 @media (max-width: 480px) {

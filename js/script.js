@@ -80,12 +80,14 @@ function themeRGB(hex) {
 }
 
 // 每帧向目标色靠近一点，形成渐变（首帧直接取目标色，不做入场渐变）
+// WAVE_LERP 越小，切页/切主题时水波颜色过渡越慢越柔和（0.05 ≈ 1.3s 完成）
+const WAVE_LERP = 0.05;
 function stepWaveColor() {
     const cfg = getCurrentPage();
     waveTargetRGB = themeRGB((cfg && cfg.color) || '#c59fda');
     if (!waveRGB) { waveRGB = waveTargetRGB.slice(); return; }
     for (let i = 0; i < 3; i++) {
-        waveRGB[i] += (waveTargetRGB[i] - waveRGB[i]) * 0.12;
+        waveRGB[i] += (waveTargetRGB[i] - waveRGB[i]) * WAVE_LERP;
     }
 }
 
