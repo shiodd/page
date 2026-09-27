@@ -309,7 +309,18 @@ function initMusicPlayer() {
         wctx.clearRect(0, 0, wrap.clientWidth || 180, WAVE_H);
     }
 
-    window.addEventListener('resize', () => { if (rafId) resizeWave(); });
+    // 用 rAF 合并 resize 处理，避免连续 resize 时反复重分配 canvas 与重排曲名
+    let resizePending = false;
+    window.addEventListener('resize', () => {
+        if (resizePending) return;
+        resizePending = true;
+        requestAnimationFrame(() => {
+            resizePending = false;
+            if (rafId) resizeWave();
+            const span = titleEl.querySelector('.mp-title-text');
+            if (span) setupMarquee(span);
+        });
+    });
 
     function loadTrack(i) {
         index = (i + tracks.length) % tracks.length;
@@ -342,11 +353,6 @@ function initMusicPlayer() {
         void span.offsetWidth; // 强制重排后再启动动画
         span.classList.add('is-marquee');
     }
-
-    window.addEventListener('resize', () => {
-        const span = titleEl.querySelector('.mp-title-text');
-        if (span) setupMarquee(span);
-    });
 
     // 用 play / pause 事件驱动 UI，比依赖 play() 的 promise 更可靠
     function play() {
@@ -773,6 +779,7 @@ function isMobileDevice() {
 function initMobileNotice() {
     if (!isMobileDevice()) return;
     if (sessionStorage.getItem('mobileNoticeShown')) return;
+    if (document.querySelector('.mobile-notice')) return; // 已存在则跳过，避免 PJAX 切页重复叠加
 
     const overlay = document.createElement('div');
     overlay.className = 'mobile-notice';

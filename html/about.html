@@ -289,6 +289,11 @@
                 preview.classList.add('ready'); // 蓄力下蹲
             });
             function releaseBounce() {
+                // about 页被 PJAX 移除后自动解绑，避免反复切页累积 document 监听
+                if (!preview.isConnected) {
+                    document.removeEventListener('mouseup', releaseBounce);
+                    return;
+                }
                 if (!pressing) return;
                 pressing = false;
                 preview.classList.remove('ready'); // 解除蓄力
@@ -302,6 +307,8 @@
             // 在元素外松开也能蹦跶
             document.addEventListener('mouseup', releaseBounce);
             const themeObserver = new MutationObserver(() => {
+                // about 页被 PJAX 移除后自动断开，避免反复切页累积 observer
+                if (!preview.isConnected) { themeObserver.disconnect(); return; }
                 if (preview.classList.contains('show')) {
                     preview.style.transition = ''; // 清残留 inline 过渡，确保淡出用 .switching 的 0.2s
                     preview.classList.remove('bounce'); // 避免蹦跶与切换淡出冲突
