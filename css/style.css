@@ -638,7 +638,7 @@ body::before {
     position: absolute;
     left: 0.6rem;
     right: 0.6rem;
-    bottom: 0;
+    bottom: 0.5rem;
     height: 2px;
     background: var(--btn-color);
     transform: scaleX(0);
@@ -650,9 +650,14 @@ body::before {
     color: var(--text-soft);
 }
 
-/* 当前页：常驻细线标识；不响应 hover 填色，避免覆盖“当前页”指示 */
+/* 当前页：常驻细线标识；不响应 hover 整块填色，避免覆盖“当前页”指示 */
 .nav-dropdown .nav-btn.is-current::after {
     transform: scaleX(1);
+}
+
+/* 当前页 hover：背景泛起一层极淡主题色，给反馈又不喧宾夺主 */
+.nav-dropdown .nav-btn.is-current:hover {
+    background: color-mix(in srgb, var(--btn-color) 14%, var(--surface-strong));
 }
 
 .nav-dropdown .nav-btn:not(.is-current):hover {
