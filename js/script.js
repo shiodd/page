@@ -60,8 +60,12 @@ const CAN_ANALYSE = window.location.protocol === 'http:' || window.location.prot
 // 播放状态：首页自动色条据此判断是否需要暂停
 let musicPlaying = false;
 
-// 把 #rrggbb 转成 rgba；夜间模式按站内 brightness(0.62) 的逻辑压暗
-function themeRgba(hex, alpha) {
+// ---- 水波颜色：切换页面时平滑过渡到新主题色，避免颜色突变 ----
+let waveRGB = null;                    // 当前显示色
+let waveTargetRGB = [197, 159, 218];   // 目标色
+
+// 取主题色的 RGB；夜间模式按站内 brightness(0.62) 的逻辑压暗
+function themeRGB(hex) {
     const h = String(hex || '#c59fda').replace('#', '');
     const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
     let r = parseInt(full.slice(0, 2), 16);
@@ -72,7 +76,21 @@ function themeRgba(hex, alpha) {
         g = Math.round(g * 0.62);
         b = Math.round(b * 0.62);
     }
-    return `rgba(${r},${g},${b},${alpha})`;
+    return [r, g, b];
+}
+
+// 每帧向目标色靠近一点，形成渐变（首帧直接取目标色，不做入场渐变）
+function stepWaveColor() {
+    const cfg = getCurrentPage();
+    waveTargetRGB = themeRGB((cfg && cfg.color) || '#c59fda');
+    if (!waveRGB) { waveRGB = waveTargetRGB.slice(); return; }
+    for (let i = 0; i < 3; i++) {
+        waveRGB[i] += (waveTargetRGB[i] - waveRGB[i]) * 0.12;
+    }
+}
+
+function waveRgba(alpha) {
+    return `rgba(${Math.round(waveRGB[0])},${Math.round(waveRGB[1])},${Math.round(waveRGB[2])},${alpha})`;
 }
 
 function initMusicPlayer() {
@@ -217,13 +235,12 @@ function initMusicPlayer() {
             const p = settleProgress;
             const sink = p * p * (WAVE_H + 6); // 加速下落，像水沉下去
             const fade = 1 - p;
-            const cfg = getCurrentPage();
-            const base = (cfg && cfg.color) || '#c59fda';
+            stepWaveColor();
             phase += 0.02;
             wctx.save();
             wctx.translate(0, sink);           // 整块水面下移，滑出播放条
-            fillSpecWave(w, phase, themeRgba(base, 0.55 * fade), 4, 1);
-            fillSpecWave(w, phase * 1.4 + 1.9, themeRgba(base, 0.26 * fade), 2, 0.62);
+            fillSpecWave(w, phase, waveRgba(0.55 * fade), 4, 1);
+            fillSpecWave(w, phase * 1.4 + 1.9, waveRgba(0.26 * fade), 2, 0.62);
             wctx.restore();
             rafId = requestAnimationFrame(drawFrame);
         } else {
@@ -260,11 +277,10 @@ function initMusicPlayer() {
         wctx.clearRect(0, 0, w, WAVE_H);
         phase += 0.04 + energyNow * 0.05; // 声音越大，水流动越快
 
-        // 水波颜色跟随当前页面的主题色
-        const cfg = getCurrentPage();
-        const base = (cfg && cfg.color) || '#c59fda';
-        fillSpecWave(w, phase, themeRgba(base, 0.55), 4, 1);
-        fillSpecWave(w, phase * 1.4 + 1.9, themeRgba(base, 0.26), 2, 0.62);
+        // 水波颜色跟随当前页面主题色，并平滑过渡
+        stepWaveColor();
+        fillSpecWave(w, phase, waveRgba(0.55), 4, 1);
+        fillSpecWave(w, phase * 1.4 + 1.9, waveRgba(0.26), 2, 0.62);
 
         rafId = requestAnimationFrame(drawFrame);
     }
