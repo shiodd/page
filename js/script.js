@@ -546,6 +546,22 @@ function injectNav() {
     }
 }
 
+// 当前页面路径（相对站点的 key，如 'index.html' / 'html/about.html'）
+function getCurrentPath() {
+    return window.location.pathname.replace(/^.*\/page\//, '') || 'index.html';
+}
+
+// 在下拉菜单里高亮“当前页”：常驻一条主题色细线（样式由 CSS .is-current 控制）
+function markCurrentNav() {
+    const cur = getCurrentPath();
+    document.querySelectorAll('.nav-dropdown .nav-btn').forEach(btn => {
+        const isCur = btn.dataset.href === cur;
+        btn.classList.toggle('is-current', isCur);
+        if (isCur) btn.setAttribute('aria-current', 'page');
+        else btn.removeAttribute('aria-current');
+    });
+}
+
 // ========== 飞出色块 ==========
 function getCurrentPage() {
     const path = window.location.pathname.replace(/^.*\/page\//, '') || 'index.html';
@@ -805,6 +821,7 @@ function initMobileNotice() {
 // ========== 初始化 ==========
 window.addEventListener('load', () => {
     injectNav();
+    markCurrentNav();
     initNav();
     initMusicPlayer();
     initTheme();
@@ -919,6 +936,7 @@ async function pjaxNavigate(url, isPop) {
 }
 
 function afterPjax() {
+    markCurrentNav(); // 切换页面后更新“当前页”指示
     // 新页面的主题色（导航 hover、播放器 hover 用）
     const cfg = getCurrentPage();
     const color = (cfg && cfg.color) || '#c59fda';

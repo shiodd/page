@@ -613,6 +613,7 @@ body::before {
 }
 
 .nav-dropdown .nav-btn {
+    position: relative; /* 给当前页细线 ::after 定位 */
     display: flex;
     align-items: center;
     gap: 0.6rem;
@@ -631,16 +632,35 @@ body::before {
     -webkit-user-select: none;
 }
 
+/* 当前页常驻的极细主题色下划线：默认收起，仅 .is-current 展开 */
+.nav-dropdown .nav-btn::after {
+    content: "";
+    position: absolute;
+    left: 0.6rem;
+    right: 0.6rem;
+    bottom: 0;
+    height: 2px;
+    background: var(--btn-color);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.25s ease;
+}
+
 .nav-dropdown .nav-btn span {
     color: var(--text-soft);
 }
 
-.nav-dropdown .nav-btn:hover {
+/* 当前页：常驻细线标识；不响应 hover 填色，避免覆盖“当前页”指示 */
+.nav-dropdown .nav-btn.is-current::after {
+    transform: scaleX(1);
+}
+
+.nav-dropdown .nav-btn:not(.is-current):hover {
     background: var(--btn-color);
     color: #fff;
 }
 
-.nav-dropdown .nav-btn:hover span {
+.nav-dropdown .nav-btn:not(.is-current):hover span {
     color: #fff;
 }
 
