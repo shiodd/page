@@ -601,7 +601,7 @@ function flyOutCurrentBlock() {
 
 function goPage(url) {
     flyOutCurrentBlock();
-    setTimeout(() => { window.location.href = url; }, 450);
+    setTimeout(() => { pjaxNavigate(url); }, 450);
 }
 
 // 给所有 .card-flip 绑定点击翻转：点左半往右翻，点右半往左翻，再次点击复位。
@@ -793,15 +793,147 @@ window.addEventListener('load', () => {
     }
 });
 
+// ========== PJAX：切换页面但保留播放器（音乐不断） ==========
+// 说明：file:// 下浏览器禁止 fetch，会自动退回整页跳转（配合已有的续播逻辑）
+const PJAX_ENABLED = window.location.protocol === 'http:' || window.location.protocol === 'https:';
+
+function absoluteUrl(rel, base) {
+    try { return new URL(rel, base).href; } catch (e) { return rel; }
+}
+
+function loadScript(src) {
+    return new Promise(resolve => {
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = resolve;
+        s.onerror = resolve; // 加载失败也继续，避免卡住整个流程
+        document.head.appendChild(s);
+    });
+}
+
+function runInlineScript(code) {
+    if (!code || !code.trim()) return;
+    try {
+        const s = document.createElement('script');
+        s.textContent = code;
+        document.head.appendChild(s);
+    } catch (e) {}
+}
+
+async function pjaxNavigate(url, isPop) {
+    if (!PJAX_ENABLED) { window.location.href = url; return; }
+
+    const target = absoluteUrl(url, window.location.href);
+    let html;
+    try {
+        const res = await fetch(target);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        html = await res.text();
+    } catch (e) {
+        window.location.href = url; // 兜底：退回整页跳转
+        return;
+    }
+
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const nav = document.getElementById('topNav');
+    const blocks = document.getElementById('arrowBlocks');
+    const player = document.querySelector('.mini-player');
+
+    // 按文档顺序收集脚本，稍后统一执行（保证 data/*.js 先于内联脚本）
+    const scripts = Array.from(doc.querySelectorAll('script'));
+
+    if (doc.title) document.title = doc.title;
+
+    // 先换地址，之后注入的相对资源才会按新页面解析
+    if (!isPop) window.history.pushState({ pjax: true }, '', target);
+
+    // 清空内容，保留常驻元素：导航 / 色条容器 / 播放器
+    Array.from(document.body.children).forEach(el => {
+        if (el === nav || el === blocks || el === player) return;
+        el.remove();
+    });
+
+    // 注入新页面内容（脚本剥离，交给下面统一执行）
+    Array.from(doc.body.children).forEach(el => {
+        if (el.tagName === 'SCRIPT') return;
+        const node = document.importNode(el, true);
+        if (node.querySelectorAll) node.querySelectorAll('script').forEach(s => s.remove());
+        document.body.appendChild(node);
+    });
+
+    // 注入新页面的内联样式，先清掉上一页留下的
+    document.head.querySelectorAll('style[data-pjax-style]').forEach(s => s.remove());
+    Array.from(doc.head.querySelectorAll('style')).forEach(st => {
+        const s = document.createElement('style');
+        s.setAttribute('data-pjax-style', '1');
+        s.textContent = st.textContent;
+        document.head.appendChild(s);
+    });
+
+    // 依次执行脚本；跳过 script.js，避免重复注入导航与播放器
+    for (const s of scripts) {
+        const src = s.getAttribute('src');
+        if (src) {
+            if (/js\/script\.js$/.test(src)) continue;
+            await loadScript(absoluteUrl(src, target));
+        } else {
+            runInlineScript(s.textContent);
+        }
+    }
+
+    afterPjax();
+}
+
+function afterPjax() {
+    // 新页面的主题色（导航 hover、播放器 hover 用）
+    const cfg = getCurrentPage();
+    const color = (cfg && cfg.color) || '#c59fda';
+    const nav = document.getElementById('topNav');
+    if (nav) nav.style.setProperty('--btn-color', color);
+    const player = document.querySelector('.mini-player');
+    if (player) player.style.setProperty('--btn-color', color);
+
+    // 重新绑定新页面的交互
+    bindCardFlip();
+    initClickBars();
+    initMobileNotice();
+
+    const cfg2 = getCurrentPage();
+    if (cfg2) showArrowBlock(cfg2.color, cfg2.type, cfg2.left);
+
+    window.scrollTo(0, 0);
+}
+
+// 浏览器前进 / 后退
+window.addEventListener('popstate', () => {
+    pjaxNavigate(window.location.href, true);
+});
+
 // ========== 首页点击色条 ==========
 const CLICK_BAR_COLORS = [
     '#E60012', '#0060A8', '#B0CA00', '#D9E5E6', '#F39800', '#000000',
     '#FC8A82', '#A4005B', '#007536', '#920783', '#FFE200', '#00A0E9', '#79C06E',
 ];
 
-function initClickBars() {
-    if (!document.querySelector('.home-sub')) return;
+let clickBarsBound = false;
+let autoBarTimer = null;
 
+function initClickBars() {
+    // 点击出色条只绑定一次，PJAX 切换页面不会重复叠加监听
+    if (!clickBarsBound) {
+        bindClickBars();
+        clickBarsBound = true;
+    }
+    // 自动色条只在首页开启；离开首页时停掉定时器
+    if (document.querySelector('.home-sub')) {
+        startAutoClickBars();
+    } else if (autoBarTimer) {
+        clearTimeout(autoBarTimer);
+        autoBarTimer = null;
+    }
+}
+
+function bindClickBars() {
     const pool = NAV_COLORS.concat(CLICK_BAR_COLORS);
 
     document.addEventListener('click', (e) => {
@@ -829,8 +961,6 @@ function initClickBars() {
 
         bar.addEventListener('animationend', () => bar.remove());
     });
-
-    startAutoClickBars();
 }
 
 function spawnClickBar(x, y) {
@@ -850,9 +980,10 @@ function spawnClickBar(x, y) {
 }
 
 function startAutoClickBars() {
+    if (autoBarTimer) clearTimeout(autoBarTimer); // 避免叠加多个定时器
     const schedule = () => {
         const delay = 5000 + Math.random() * 5000;
-        setTimeout(() => {
+        autoBarTimer = setTimeout(() => {
             spawnAutoBar();
             schedule();
         }, delay);
