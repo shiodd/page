@@ -26,16 +26,14 @@
             <p class="home-sub"><span class="gradient-text">輝き</span>の向こう側へ！</p>
 
             <div class="busuanzi-stats">
-                <p>您是第<span id="busuanzi_site_uv"></span>个访问本站的P</p>
+                <p>您是第<span id="busuanzi_value_site_uv"></span>个访问本站的P</p>
             </div>
             <script>
                 (function () {
-                    // busuanzi 脚本内部有 window.busuanziRequestSent 一次性开关，
-                    // PJAX 切回首页时若不清掉，它会直接 return 导致计数为空
-                    delete window.busuanziRequestSent;
-
+                    // 用经典版不蒜子：走 <script> 注入（JSONP 思路），不经过 fetch，
+                    // 因此在 GitHub Pages 上不会触发 CORS 拦截
                     var s = document.createElement('script');
-                    s.src = 'https://cdn.busuanzi.cc/busuanzi/3.6.9/busuanzi.min.js';
+                    s.src = 'https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js';
                     s.async = true;
                     var done = false;
                     s.onload = function () { done = true; };
@@ -45,7 +43,7 @@
                         if (!done) showPlaceholder();
                     }, 3000);
                     function showPlaceholder() {
-                        var el = document.getElementById('busuanzi_site_uv');
+                        var el = document.getElementById('busuanzi_value_site_uv');
                         if (el && !el.textContent.trim()) {
                             el.textContent = '--';
                         }
