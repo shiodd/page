@@ -26,18 +26,15 @@
             <p class="home-sub"><span class="gradient-text">輝き</span>の向こう側へ！</p>
 
             <div class="busuanzi-stats">
-                <p>您是第<span id="busuanzi_site_uv"></span>位访问本站的P</p>
+                <p>您是第<span id="busuanzi_value_site_uv"></span>位访问本站的P</p>
             </div>
             <script>
                 (function () {
-                    // 不蒜子 3.6.9：内部用 fetch 请求 api.php，
-                    // 元素 id 用新版命名（无 value_ 前缀）
-                    // busuanzi 脚本内部有 window.busuanziRequestSent 一次性开关，
-                    // PJAX 切回首页时若不清掉，它会直接 return 导致计数为空
-                    delete window.busuanziRequestSent;
-
+                    // Vercount（原不蒜子 3.6.9 的计数接口已 502 宕机，2026-11-17 更换）
+                    // 动态注入：PJAX 切回首页时这段会重新执行、重新请求计数
+                    // 元素 id 用 busuanzi_value_ 前缀，Vercount 兼容这套命名
                     var s = document.createElement('script');
-                    s.src = 'https://cdn.busuanzi.cc/busuanzi/3.6.9/busuanzi.min.js';
+                    s.src = 'https://events.vercount.one/js';
                     s.async = true;
                     var done = false;
                     s.onload = function () { done = true; };
@@ -47,7 +44,7 @@
                         if (!done) showPlaceholder();
                     }, 3000);
                     function showPlaceholder() {
-                        var el = document.getElementById('busuanzi_site_uv');
+                        var el = document.getElementById('busuanzi_value_site_uv');
                         if (el && !el.textContent.trim()) {
                             el.textContent = '--';
                         }
